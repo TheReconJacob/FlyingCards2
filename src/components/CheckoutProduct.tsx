@@ -1,6 +1,5 @@
 import { StarIcon } from "@heroicons/react/24/solid";
-import Image from "next/image";
-import Currency from "react-currency-formatter";
+import numeral from "numeral";
 import { useDispatch } from "react-redux";
 import { IProduct } from "../../typings";
 import { addToBasket, removeFromBasket } from "../slices/basketSlice";
@@ -36,7 +35,7 @@ const CheckoutProduct = ({ product }: Props) => {
 
   return (
     <div className="grid grid-cols-5">
-      <Image
+      <img
         className="object-contain"
         src={image}
         width={200}
@@ -54,10 +53,10 @@ const CheckoutProduct = ({ product }: Props) => {
             ))}
         </div>
         <p className="text-xs my-2 line-clamp-3">{description}</p>
-        <Currency quantity={price} currency="CAD" />
+        {numeral(price).format('£0,0.00')}
         {hasFast && (
           <div className="flex items-center space-x-2">
-            <Image
+            <img
               className="pt-1 w-12 h-12"
               src="/fastblacklogo.svg"
               width={48}

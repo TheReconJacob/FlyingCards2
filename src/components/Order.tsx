@@ -1,6 +1,5 @@
 import moment from "moment";
-import Image from "next/image";
-import Currency from "react-currency-formatter";
+import numeral from "numeral";
 import { IOrder } from "../../typings";
 
 type Props = {
@@ -21,9 +20,8 @@ const Order = ({ order }: Props) => {
         <div>
           <p className="text-xs font-bold">TOTAL</p>
           <p>
-            <Currency quantity={order.amount} currency="CAD" /> - One-Day
-            Delivery{" "}
-            <Currency quantity={order.amount_shipping} currency="CAD" />
+            {numeral(order.amount).format('£0,0.00')} - One-Day Delivery{" "}
+            {numeral(order.amount_shipping).format('£0,0.00')}
           </p>
         </div>
 
@@ -39,7 +37,14 @@ const Order = ({ order }: Props) => {
       <div className="p-5 sm:p-10">
         <div className="flex space-x-6 overflow-x-auto">
           {order.images.map((image, i) => (
-            <Image className="object-contain w-40 h-40" key={i} src={image} alt="image" width={128} height={80} />
+            <img
+              className="object-contain w-40 h-40"
+              key={i}
+              src={image}
+              alt="image"
+              width={128}
+              height={80}
+            />
           ))}
         </div>
       </div>

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { IProduct } from "../../typings";
 import Product from "./Product";
 
@@ -13,21 +12,20 @@ const ProductFeed = ({ products }: Props) => {
         <Product key={product.id.toString()} product={product} />
       ))}
 
-      <Image
+      <img
         className="md:col-span-full"
         src="/adfaststudio.png"
         width={1600}
         height={400}
         alt="Fast Studio"
-        priority
       />
 
       {products.slice(4, 5).map((product) => (
-        <Product key={product.id.toString()} product={product} />
+        <Product key={product.id} product={product} />
       ))}
 
       {products.slice(5, products.length).map((product) => (
-        <Product key={product.id.toString()} product={product} />
+        <Product key={product.id} product={product} />
       ))}
     </div>
   );

@@ -1,8 +1,7 @@
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
-import Currency from "react-currency-formatter";
+import numeral from "numeral";
 import { useSelector } from "react-redux";
 import CheckoutProduct from "../components/CheckoutProduct";
 import Header from "../components/Header";
@@ -43,7 +42,7 @@ const Checkout = (props: Props) => {
       <main className="lg:flex max-w-screen-2xl mx-auto">
         {/* left */}
         <div className="flex-grow m-5 shadow-sm">
-          <Image
+          <img
             className="object-contain"
             src="/earphones.png"
             width={1020}
@@ -69,7 +68,7 @@ const Checkout = (props: Props) => {
                 Subtotal ({items.length} items):
                 <span className="font-bold">
                   {" "}
-                  <Currency quantity={total} currency="CAD" />
+                  {numeral(total).format("£0,0.00")}
                 </span>
               </h2>
               <button

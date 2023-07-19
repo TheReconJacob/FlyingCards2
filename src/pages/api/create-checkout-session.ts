@@ -8,7 +8,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   const transformedItems = items.map((item: IProduct) => ({
     price_data: {
-      currency: "cad",
+      currency: "gbp",
       unit_amount: item.price * 100,
       product_data: {
         name: item.title,
@@ -17,11 +17,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       },
     },
     quantity: 1,
-  }));
+    metadata: {
+      id: item.id,
+    },
+  }));  
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
-    shipping_options: [{ shipping_rate: "shr_1M3liKLqDHsIaXlfZyXwBv7Z" }],
     shipping_address_collection: {
       allowed_countries: ["CA", "US", "GB"],
     },

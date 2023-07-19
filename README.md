@@ -62,7 +62,7 @@ Then, create a .env.local file in the root of the project and configure the foll
 # Need to add Authorized redirect URIs to Google Cloud
 # http://localhost:3000/api/auth/callback/google
 # https://your.deployment.url.com/api/auth/callback/google
-GOOGLE_ID=
+NEXT_PUBLIC_GOOGLE_ID=
 GOOGLE_SECRET=
 NEXTAUTH_URL=http://localhost:3000
 

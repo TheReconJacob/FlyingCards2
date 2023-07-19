@@ -5,6 +5,7 @@ import { IProduct, ISession } from "../../typings";
 import Banner from "../components/Banner";
 import Header from "../components/Header";
 import ProductFeed from "../components/ProductFeed";
+import admin from '../../firebaseAdmin';
 
 type Props = {
   products: IProduct[];
@@ -36,9 +37,10 @@ export default Home;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const products = await fetch("https://fakestoreapi.com/products").then(
-    (res) => res.json()
-  );
+  const db = admin.firestore();
+  const productsRef = db.collection('products');
+  const snapshot = await productsRef.get();
+  const products = snapshot.docs.map(doc => doc.data());
   
   // Get user logged in credentials
   const session: ISession | null = await getSession(context);

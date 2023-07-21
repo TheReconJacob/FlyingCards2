@@ -1,9 +1,26 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { IProduct } from "../../typings";
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+type NextApiRequest = {
+  body: any;
+  cookies: { [key: string]: string };
+  query: { [key: string]: string | string[] };
+  headers: { [key: string]: string | string[] };
+};
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+type NextApiResponse = {
+  status: (code: number) => NextApiResponse;
+  json: (body: any) => void;
+};
+
+const stripePromise = import("stripe").then((stripeModule) => {
+  const Stripe = stripeModule.default as typeof import("stripe").default;
+  return new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+    apiVersion: "2022-08-01",
+  });
+});
+
+exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  const stripe = await stripePromise;
   console.log("create-checkout-session called with req.body:", req.body);
   const { items, email } = req.body;
 

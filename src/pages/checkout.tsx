@@ -13,6 +13,7 @@ type Props = {};
 
 const Checkout = (props: Props) => {
   const items = useSelector(selectItems);
+  console.log("Checkout items:", items);
   const total = useSelector(selectTotal);
   const { data: session } = useSession();
 

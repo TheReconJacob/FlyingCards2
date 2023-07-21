@@ -23,6 +23,7 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const stripe = await stripePromise;
   console.log("create-checkout-session called with req.body:", req.body);
   const { items, email } = req.body;
+  console.log("create-checkout-session items:", items);
 
   const transformedItems = items.map((item: IProduct) => ({
     price_data: {

@@ -23,7 +23,7 @@ const Checkout = (props: Props) => {
     }
     // Call the backend to create a checkout session
     try {
-      const checkoutSession = await axios.post("/api/create-checkout-session", {
+      const checkoutSession = await axios.post("/.netlify/functions/create-checkout-session", {
         items: items,
         email: session?.user.email,
       });

@@ -17,9 +17,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       },
     },
     quantity: 1,
-    metadata: {
-      id: item.id,
-    },
   }));  
 
   const session = await stripe.checkout.sessions.create({

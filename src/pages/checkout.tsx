@@ -17,22 +17,29 @@ const Checkout = (props: Props) => {
   const { data: session } = useSession();
 
   const createCheckoutSession = async () => {
+    console.log("createCheckoutSession called");
     if (!stripePromise) {
       stripePromise = loadStripe(process.env.stripe_public_key!);
     }
     // Call the backend to create a checkout session
-    const checkoutSession = await axios.post("/api/create-checkout-session", {
-      items: items,
-      email: session?.user.email,
-    });
-    const stripe = await stripePromise;
-    // Redirect user/customer to Stripe Checkout
-    const result = await stripe!.redirectToCheckout({
-      sessionId: checkoutSession.data.id,
-    });
+    try {
+      const checkoutSession = await axios.post("/api/create-checkout-session", {
+        items: items,
+        email: session?.user.email,
+      });
+      console.log("checkoutSession:", checkoutSession);
+      const stripe = await stripePromise;
+      // Redirect user/customer to Stripe Checkout
+      const result = await stripe!.redirectToCheckout({
+        sessionId: checkoutSession.data.id,
+      });
+      console.log("redirectToCheckout result:", result);
 
-    if (result.error) {
-      alert(result.error.message);
+      if (result.error) {
+        alert(result.error.message);
+      }
+    } catch (error) {
+      console.error("Error creating checkout session:", error);
     }
   };
 

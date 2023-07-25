@@ -8,8 +8,8 @@ type NextApiRequest = {
 };
 
 type NextApiResponse = {
-  status: (code: number) => NextApiResponse;
-  json: (body: any) => void;
+  statusCode: number;
+  send: (data?: any) => void;
 };
 
 const stripePromise = import("stripe").then((stripeModule) => {
@@ -63,7 +63,8 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
     });
     
     console.log("session created:", session);
-    res.status(200).json({ id: session.id });
+    res.statusCode = 200;
+    res.send({ id: session.id });
     
   } catch (error) {
     if (error instanceof Error) {
@@ -72,6 +73,7 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
       console.error("Error creating checkout session:", error);
     }
     
-    res.status(500).json({ error });
+    res.statusCode = 500;
+    res.send({ error });
   }
 };

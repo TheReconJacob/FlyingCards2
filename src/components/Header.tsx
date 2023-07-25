@@ -20,19 +20,19 @@ const Header = (props: Props) => {
   return (
     <header>
       {/* top nav */}
-      <div className="flex items-center bg-fast_blue p-1 flex-grow py-2">
+      <div className="flex items-center bg-[#1d2298] p-1 flex-grow py-2">
         <div className="h-12 flex items-center flex-grow sm:flex-grow-0">
           <Image
             onClick={() => router.push("/")}
             className="cursor-pointer overflow-hidden mt-2"
-            src="/fastlogo.svg"
+            src="/flyingcards.png"
             width={150}
             height={40}
-            alt="Fast marketplace"
+            alt="Flying Cards"
           />
         </div>
         {/* search */}
-        <div className="hidden sm:flex items-center h-10 rounded-md flex-grow cursor-pointer bg-[#01C4CC] hover:bg-[#03a1a7]">
+        <div className="hidden sm:flex items-center h-10 rounded-md flex-grow cursor-pointer bg-[#4c4fbd] hover:bg-[#6c6fdd]">
           <input
             type="text"
             className="bg-white p-2 h-full w-6 flex-grow flex-shrink rounded-l-md focus:outline-none px-4"
@@ -71,7 +71,7 @@ const Header = (props: Props) => {
         </div>
       </div>
       {/* bottom nav */}
-      <div className="flex items-center space-x-3 p-2 pl-6 bg-fast_blue-light text-white text-sm">
+      <div className="flex items-center space-x-3 p-2 pl-6 bg-[#4c4fbd] text-white text-sm">
         <p className="flex items-center">
           <Bars3Icon className="h-6 mr-1" />
           All

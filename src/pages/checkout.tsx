@@ -46,13 +46,6 @@ const Checkout = (props: Props) => {
       <main className="lg:flex max-w-screen-2xl mx-auto">
         {/* left */}
         <div className="flex-grow m-5 shadow-sm">
-          <img
-            className="object-contain"
-            src="/earphones.png"
-            width={1020}
-            height={250}
-            alt="earphones ad"
-          />
           <div className="flex flex-col p-5 space-y-10 bg-white">
             <h1 className="text-3xl border-b pb-4">
               {items.length === 0

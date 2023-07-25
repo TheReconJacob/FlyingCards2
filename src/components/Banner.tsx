@@ -20,8 +20,8 @@ const Banner = (props: Props) => {
           <Image
             width={800}
             height={500}
-            src="/fastbooks.png"
-            alt="fastbooks"
+            src="/carousel1.png"
+            alt="carousel1"
             priority
           />
         </div>
@@ -29,16 +29,16 @@ const Banner = (props: Props) => {
           <Image
             width={800}
             height={500}
-            src="/fastmovies.png"
-            alt="fastmovies"
+            src="/carousel2.png"
+            alt="carousel2"
           />
         </div>
         <div>
           <Image
             width={800}
             height={500}
-            src="/fastmusic.png"
-            alt="fastmusic"
+            src="/carousel3.png"
+            alt="carousel3"
           />
         </div>
       </Carousel>

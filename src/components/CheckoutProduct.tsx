@@ -66,18 +66,6 @@ const CheckoutProduct = ({ product }: Props) => {
         </div>
         <p className="text-xs my-2 line-clamp-3">{description}</p>
         {numeral(price).format('£0,0.00')}
-        {hasFast && (
-          <div className="flex items-center space-x-2">
-            <img
-              className="pt-1 w-12 h-12"
-              src="/fastblacklogo.svg"
-              width={48}
-              height={48}
-              alt="fast"
-            />
-            <p className="text-xs text-gray-500">FREE One-Day Delivery</p>
-          </div>
-        )}
       </div>
       {/* Right */}
       <div className="flex flex-col space-y-2 my-auto justify-self-end">

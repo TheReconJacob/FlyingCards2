@@ -65,18 +65,6 @@ const Product: React.FC<Props> = ({ product }: Props) => {
           {numeral(price).format('£0,0.00')}
         </div>
         <p className="text-sm my-2">Available Quantity: {quantity}</p>
-        {hasFast && (
-          <div className="flex items-center space-x-2 -mt-5">
-            <img
-              className="pt-1 w-12 h-12"
-              src="/fastblacklogo.svg"
-              width={252}
-              height={350}
-              alt="fast"
-            />
-            <p className="text-xs text-gray-500">FREE One-Day Delivery</p>
-          </div>
-        )}
         <button onClick={addItemToBasket} className="mt-auto button">
           Add to Basket
         </button>

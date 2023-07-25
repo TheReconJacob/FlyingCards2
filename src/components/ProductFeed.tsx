@@ -12,14 +12,6 @@ const ProductFeed = ({ products }: Props) => {
         <Product key={product.id.toString()} product={product} />
       ))}
 
-      <img
-        className="md:col-span-full"
-        src="/adfaststudio.png"
-        width={1600}
-        height={400}
-        alt="Fast Studio"
-      />
-
       {products.slice(4, 5).map((product) => (
         <Product key={product.id} product={product} />
       ))}

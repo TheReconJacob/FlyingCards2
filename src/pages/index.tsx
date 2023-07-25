@@ -17,7 +17,7 @@ const Home = ({ products }: Props) => {
   return (
     <div className="bg-gray-100">
       <Head>
-        <title>Fast Marketplace</title>
+        <title>Flying Cards</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {/* Header */}

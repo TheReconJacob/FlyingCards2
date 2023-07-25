@@ -8,7 +8,7 @@ export interface BasketState {
 
 // Load initial state from localStorage
 const initialState: BasketState = {
-  items: JSON.parse(localStorage.getItem("basket") || "[]"),
+  items: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem("basket") || "[]") : [],
 };
 
 export const basketSlice = createSlice({
@@ -18,7 +18,9 @@ export const basketSlice = createSlice({
     addToBasket: (state, action: PayloadAction<IProduct>) => {
       state.items = [...state.items, action.payload];
       // Save state to localStorage
-      localStorage.setItem("basket", JSON.stringify(state.items));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("basket", JSON.stringify(state.items));
+      }
     },
     removeFromBasket: (state, action) => {
       const index = state.items.findIndex(
@@ -37,7 +39,9 @@ export const basketSlice = createSlice({
 
       state.items = newBasket;
       // Save state to localStorage
-      localStorage.setItem("basket", JSON.stringify(state.items));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("basket", JSON.stringify(state.items));
+      }
     },
   },
 });

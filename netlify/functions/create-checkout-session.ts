@@ -20,8 +20,14 @@ const stripePromise = import("stripe").then((stripeModule) => {
 });
 
 exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log("typeof req.body:", typeof req.body);
+  console.log("req.body:", req.body);
+  console.log("Object.keys(req):", Object.keys(req));
+  console.log("Object.keys(res):", Object.keys(res));
+  
   const stripe = await stripePromise;
-  console.log("create-checkout-session called with req.body:", typeof req.body);
+  console.log("create-checkout-session called with req.body:", req.body);
+  
   const { items, email } = JSON.parse(req.body);
   console.log("create-checkout-session items:", items);
 
@@ -37,6 +43,7 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
     },
     quantity: 1,
   }));
+  
   console.log("transformedItems:", transformedItems);
 
   try {
@@ -54,13 +61,17 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
         images: JSON.stringify(items.map((item: IProduct) => item.image)),
       },
     });
+    
     console.log("session created:", session);
     res.status(200).json({ id: session.id });
+    
   } catch (error) {
     if (error instanceof Error) {
       console.error("Error creating checkout session:", error.message);
     } else {
       console.error("Error creating checkout session:", error);
     }
+    
+    res.status(500).json({ error });
   }
 };

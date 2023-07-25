@@ -9,7 +9,6 @@ type NextApiRequest = {
 
 type NextApiResponse = {
   statusCode: number;
-  send: (data?: any) => void;
 };
 
 const stripePromise = import("stripe").then((stripeModule) => {
@@ -19,10 +18,11 @@ const stripePromise = import("stripe").then((stripeModule) => {
   });
 });
 
-exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
+exports.handler = async (event: NextApiRequest, context: NextApiResponse, callback: Function) => {
+  
   const stripe = await stripePromise;
   
-  const { items, email } = JSON.parse(req.body);
+  const { items, email } = JSON.parse(event.body);
 
   const transformedItems = items.map((item: IProduct) => ({
     price_data: {
@@ -36,6 +36,7 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
     },
     quantity: 1,
   }));
+  
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -53,8 +54,10 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
     
-    res.statusCode = 200;
-    res.send({ id: session.id });
+    callback(null, {
+      statusCode: 200,
+      body: JSON.stringify({ id: session.id }),
+    });
     
   } catch (error) {
     if (error instanceof Error) {
@@ -63,7 +66,9 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
       console.error("Error creating checkout session:", error);
     }
     
-    res.statusCode = 500;
-    res.send({ error });
+    callback(null, {
+      statusCode: 500,
+      body: JSON.stringify({ error }),
+    });
   }
 };

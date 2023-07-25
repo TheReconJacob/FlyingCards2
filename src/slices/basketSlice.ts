@@ -6,8 +6,9 @@ export interface BasketState {
   items: IProduct[];
 }
 
+// Load initial state from localStorage
 const initialState: BasketState = {
-  items: [],
+  items: JSON.parse(localStorage.getItem("basket") || "[]"),
 };
 
 export const basketSlice = createSlice({
@@ -16,6 +17,8 @@ export const basketSlice = createSlice({
   reducers: {
     addToBasket: (state, action: PayloadAction<IProduct>) => {
       state.items = [...state.items, action.payload];
+      // Save state to localStorage
+      localStorage.setItem("basket", JSON.stringify(state.items));
     },
     removeFromBasket: (state, action) => {
       const index = state.items.findIndex(
@@ -33,6 +36,8 @@ export const basketSlice = createSlice({
       }
 
       state.items = newBasket;
+      // Save state to localStorage
+      localStorage.setItem("basket", JSON.stringify(state.items));
     },
   },
 });

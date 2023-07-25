@@ -21,7 +21,7 @@ const stripePromise = import("stripe").then((stripeModule) => {
 
 exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const stripe = await stripePromise;
-  console.log("create-checkout-session called with req.body:", req.body);
+  console.log("create-checkout-session called with req.body:", typeof req.body);
   const { items, email } = req.body;
   console.log("create-checkout-session items:", items);
 

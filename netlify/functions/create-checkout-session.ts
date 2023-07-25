@@ -20,16 +20,9 @@ const stripePromise = import("stripe").then((stripeModule) => {
 });
 
 exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  console.log("typeof req.body:", typeof req.body);
-  console.log("req.body:", req.body);
-  console.log("Object.keys(req):", Object.keys(req));
-  console.log("Object.keys(res):", Object.keys(res));
-  
   const stripe = await stripePromise;
-  console.log("create-checkout-session called with req.body:", req.body);
   
   const { items, email } = JSON.parse(req.body);
-  console.log("create-checkout-session items:", items);
 
   const transformedItems = items.map((item: IProduct) => ({
     price_data: {
@@ -43,8 +36,6 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
     },
     quantity: 1,
   }));
-  
-  console.log("transformedItems:", transformedItems);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -62,7 +53,6 @@ exports.handler = async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
     
-    console.log("session created:", session);
     res.statusCode = 200;
     res.send({ id: session.id });
     

@@ -12,13 +12,11 @@ let stripePromise: Promise<Stripe | null>;
 type Props = {};
 
 const Checkout = (props: Props) => {
-  const items = useSelector(selectItems);
-  console.log("Checkout items:", items);
+  const items = useSelector(selectItems)
   const total = useSelector(selectTotal);
   const { data: session } = useSession();
 
   const createCheckoutSession = async () => {
-    console.log("createCheckoutSession called");
     if (!stripePromise) {
       stripePromise = loadStripe(process.env.stripe_public_key!);
     }
@@ -28,13 +26,11 @@ const Checkout = (props: Props) => {
         items: items,
         email: session?.user.email,
       });
-      console.log("checkoutSession:", checkoutSession);
       const stripe = await stripePromise;
       // Redirect user/customer to Stripe Checkout
       const result = await stripe!.redirectToCheckout({
         sessionId: checkoutSession.data.id,
       });
-      console.log("redirectToCheckout result:", result);
 
       if (result.error) {
         alert(result.error.message);

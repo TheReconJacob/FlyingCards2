@@ -1,18 +1,21 @@
 import { StarIcon } from "@heroicons/react/24/solid";
 import numeral from "numeral";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { IProduct } from "../../typings";
-import { addToBasket } from "../slices/basketSlice";
+import { addToBasket, selectItems } from "../slices/basketSlice";
 
 type Props = {
   product: IProduct;
 };
 
 const Product: React.FC<Props> = ({ product }: Props) => {
-  const { id, title, price, description, category, image, rating } = product;
+  const { id, title, price, description, category, image, rating, quantity } = product;
   const { rate } = rating;
   const hasFast = rate > 4 ? true : false;
   const dispatch = useDispatch();
+  
+  // Call useSelector at the top level of the component
+  const basketItems = useSelector(selectItems);
 
   const addItemToBasket = () => {
     const product = {
@@ -24,9 +27,18 @@ const Product: React.FC<Props> = ({ product }: Props) => {
       image,
       rating,
       hasFast,
+      quantity,
     };
-    // Send product to Redux Store as a basket slice action
-    dispatch(addToBasket({...product, hasFast}));
+    
+    // Check if there are enough items available before adding to basket
+    const itemCount = basketItems.filter(item => item.id === id).length;
+    
+    if (itemCount < quantity) {
+      // Send product to Redux Store as a basket slice action
+      dispatch(addToBasket({...product, hasFast}));
+    } else {
+      console.warn(`Can't add more than ${quantity} of product (id: ${id}) to basket`);
+    }
   };
 
   return (
@@ -52,6 +64,7 @@ const Product: React.FC<Props> = ({ product }: Props) => {
         <div className="mb-5">
           {numeral(price).format('£0,0.00')}
         </div>
+        <p className="text-sm my-2">Available Quantity: {quantity}</p>
         {hasFast && (
           <div className="flex items-center space-x-2 -mt-5">
             <img

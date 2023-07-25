@@ -1,18 +1,20 @@
 import { StarIcon } from "@heroicons/react/24/solid";
 import numeral from "numeral";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { IProduct } from "../../typings";
-import { addToBasket, removeFromBasket } from "../slices/basketSlice";
+import { addToBasket, removeFromBasket, selectItems } from "../slices/basketSlice";
 
 type Props = {
   product: IProduct;
 };
 
 const CheckoutProduct = ({ product }: Props) => {
-  const { id, title, price, description, category, image, rating, hasFast } =
-    product;
+  const { id, title, price, description, category, image, rating, hasFast, quantity } = product;
   const { rate } = rating;
   const dispatch = useDispatch();
+  
+  // Call useSelector at the top level of the component
+  const basketItems = useSelector(selectItems);
 
   const addItemToBasket = () => {
     const product = {
@@ -24,10 +26,20 @@ const CheckoutProduct = ({ product }: Props) => {
       image,
       rating,
       hasFast,
+      quantity,
     };
-    // Send product id to Redux Store to remove from basket
-    dispatch(addToBasket(product));
+    
+    // Check if there are enough items available before adding to basket
+    const itemCount = basketItems.filter(item => item.id === id).length;
+    
+    if (itemCount < quantity) {
+      // Send product id to Redux Store to remove from basket
+      dispatch(addToBasket(product));
+    } else {
+      console.warn(`Can't add more than ${quantity} of product (id: ${id}) to basket`);
+    }
   };
+  
   const removeItemFromBasket = () => {
     // Send product to Redux Store as a basket slice action
     dispatch(removeFromBasket({id}));

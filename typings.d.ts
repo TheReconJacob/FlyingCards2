@@ -10,6 +10,7 @@ export interface IProduct {
     count: number;
   };
   hasFast?: boolean;
+  quantity: number;
 }
 
 export interface IOrder {

@@ -18,7 +18,7 @@ const Home = ({ products }: Props) => {
     <div className="bg-gray-100">
       <Head>
         <title>Flying Cards</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/fcicon.ico" />
       </Head>
       {/* Header */}
       <Header />

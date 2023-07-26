@@ -43,10 +43,17 @@ export const basketSlice = createSlice({
         localStorage.setItem("basket", JSON.stringify(state.items));
       }
     },
+    emptyBasket: (state) => {
+      state.items = [];
+      // Save state to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("basket", JSON.stringify(state.items));
+      }
+    },
   },
 });
 
-export const { addToBasket, removeFromBasket } = basketSlice.actions;
+export const { addToBasket, removeFromBasket, emptyBasket } = basketSlice.actions;
 
 // Selectors pull the information from the Global store slice
 export const selectItems = (state: RootState) => state.basket.items;

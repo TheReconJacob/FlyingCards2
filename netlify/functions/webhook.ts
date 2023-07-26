@@ -1,7 +1,26 @@
-import * as admin from "firebase-admin";
-import { ServiceAccount } from "firebase-admin";
-import { buffer } from "micro";
-import { NextApiRequest, NextApiResponse } from "next";
+import type Stripe from 'stripe';
+import type { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
+
+const adminPromise = import("firebase-admin").then((adminModule) => {
+  const admin = adminModule.default;
+  return { admin };
+});
+
+const microPromise = import("micro").then((microModule) => {
+  const { buffer } = microModule;
+  return { buffer };
+});
+
+const stripePromise = import("stripe").then((stripeModule) => {
+  const Stripe = stripeModule.default;
+  if (typeof process.env.STRIPE_SECRET_KEY === "string") {
+    return new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2022-08-01",
+    });
+  } else {
+    throw new Error("STRIPE_SECRET_KEY environment variable is not defined");
+  }
+});
 
 // Secure a connection to Firebase from backend
 const serviceAccount = {
@@ -10,18 +29,26 @@ const serviceAccount = {
     ? process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/gm, "\n")
     : undefined,
   clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-} as ServiceAccount;
+};
 
-const app = !admin.apps.length
-  ? admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    })
-  : admin.app();
+const appPromise = adminPromise.then(({ admin }) => {
+  return !admin.apps.length
+    ? admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      })
+    : admin.app();
+});
 
-// Establish connection to Stripe
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
+if (typeof endpointSecret !== 'string') {
+  throw new Error('Missing or invalid STRIPE_ENDPOINT_SECRET environment variable');
+}
+
 const fulfillOrder = async (session: any) => {
+  const { admin } = await adminPromise;
+  // Define the app variable
+  const app = await appPromise;
+
   return app
     .firestore()
     .collection("users")
@@ -37,40 +64,79 @@ const fulfillOrder = async (session: any) => {
     .then(() => {
       console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
     });
+
+  // Get purchased items from checkout session
+  const stripe = await stripePromise;
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+  const items = lineItems.data.map((item: Stripe.LineItem) => ({
+    name: item.description,
+    quantity: item.quantity,
+  }));
+
+  // Update quantity value of each item in Firebase
+  for (const item of items) {
+    // Get item document from Firebase
+    const itemDoc = await admin
+      .firestore()
+      .collection("items")
+      .doc(item.name)
+      .get();
+
+    if (itemDoc.exists) {
+      // Check if item quantity is defined and not null
+      if (item.quantity !== null) {
+        // Decrement item quantity by purchased quantity
+        await itemDoc.ref.update({
+          quantity: admin.firestore.FieldValue.increment(-item.quantity!),
+        });
+      }
+    }
+  }
+
+  console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
 };
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  if (req.method === "POST") {
-    const requestBuffer = await buffer(req);
-    const payload = requestBuffer.toString();
-    const sig = req.headers["stripe-signature"];
+exports.handler = async (event: APIGatewayProxyEvent, context: Context, callback: Callback) => {
+  if (event.httpMethod === "POST") {
+    const payload = event.body;
+    const sig = event.headers["stripe-signature"];
 
-    let event;
+    let stripeEvent;
 
     // Verify that the Event posted came from Stripe
     try {
-      event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
-    } catch (err: any) {
-      console.log("ERROR", err.message);
-      return res.status(400).send(`Webhook error: ${err.message}`);
+      if (payload === null) {
+        throw new Error('Missing request body');
+      }
+      if (sig === undefined) {
+        throw new Error('Missing stripe-signature header');
+      }
+      const stripe = await stripePromise;
+      stripeEvent = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log("ERROR", err.message);
+      } else {
+        console.log("ERROR", err);
+      }
+      return callback(null, {
+        statusCode: 400,
+        body: `Webhook error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      });
     }
     // Handle the checkout.session.completed event
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
+    if (stripeEvent.type === "checkout.session.completed") {
+      const session = stripeEvent.data.object;
 
       // Fullfil order
       return fulfillOrder(session)
-        .then(() => res.status(200))
+        .then(() => callback(null, { statusCode: 200 }))
         .catch((err) => {
-          res.status(400).send(`Webhook Error: ${err.message}`);
+          callback(null, {
+            statusCode: 400,
+            body: `Webhook Error: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          });
         });
     }
   }
-};
-
-export const config = {
-  api: {
-    bodyParser: false,
-    externalResolver: true,
-  },
 };

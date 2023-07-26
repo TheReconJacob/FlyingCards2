@@ -3,16 +3,17 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import numeral from "numeral";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CheckoutProduct from "../components/CheckoutProduct";
 import Header from "../components/Header";
-import { selectItems, selectTotal } from "../slices/basketSlice";
+import { emptyBasket, selectItems, selectTotal } from "../slices/basketSlice";
 
 let stripePromise: Promise<Stripe | null>;
 
 type Props = {};
 
 const Checkout = (props: Props) => {
+  const dispatch = useDispatch();
   const items = useSelector(selectItems);
   const total = useSelector(selectTotal);
   const { data: session } = useSession();
@@ -40,6 +41,10 @@ const Checkout = (props: Props) => {
 
       if (result.error) {
         alert(result.error.message);
+      } else {
+        // Payment was successful
+        // Empty the user's basket
+        dispatch(emptyBasket());
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);

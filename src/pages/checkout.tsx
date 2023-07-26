@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -12,9 +13,10 @@ let stripePromise: Promise<Stripe | null>;
 type Props = {};
 
 const Checkout = (props: Props) => {
-  const items = useSelector(selectItems)
+  const items = useSelector(selectItems);
   const total = useSelector(selectTotal);
   const { data: session } = useSession();
+  const [shippingCountry, setShippingCountry] = useState("");
 
   const createCheckoutSession = async () => {
     if (!stripePromise) {
@@ -22,10 +24,14 @@ const Checkout = (props: Props) => {
     }
     // Call the backend to create a checkout session
     try {
-      const checkoutSession = await axios.post("/.netlify/functions/create-checkout-session", {
-        items: items,
-        email: session?.user.email,
-      });
+      const checkoutSession = await axios.post(
+        "/.netlify/functions/create-checkout-session",
+        {
+          items: items,
+          email: session?.user.email,
+          shippingCountry: shippingCountry,
+        }
+      );
       const stripe = await stripePromise;
       // Redirect user/customer to Stripe Checkout
       const result = await stripe!.redirectToCheckout({
@@ -61,6 +67,21 @@ const Checkout = (props: Props) => {
         <div className="flex flex-col bg-white p-10 shadow-md">
           {items.length > 0 && (
             <>
+              {/* Shipping country form */}
+              <form onSubmit={(e) => e.preventDefault()}>
+                <label htmlFor="shipping-country">Shipping Country:</label>
+                <select
+                  id="shipping-country"
+                  value={shippingCountry}
+                  onChange={(e) => setShippingCountry(e.target.value)}
+                >
+                  <option value="">Select a country</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="US">United States</option>
+                  {/* Add more options for other countries here */}
+                </select>
+              </form>
+
               <h2 className="whitespace-nowrap">
                 Subtotal ({items.length} items):
                 <span className="font-bold">

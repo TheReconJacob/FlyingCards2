@@ -57,13 +57,6 @@ const CheckoutProduct = ({ product }: Props) => {
       {/* middle */}
       <div className="col-span-3 mx-5">
         <p>{title}</p>
-        <div className="flex">
-          {Array(Math.round(rate))
-            .fill(0)
-            .map((_, i) => (
-              <StarIcon key={i.toString()} className="h-5 text-yellow-500" />
-            ))}
-        </div>
         <p className="text-xs my-2 line-clamp-3">{description}</p>
         {numeral(price).format('£0,0.00')}
       </div>

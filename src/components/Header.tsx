@@ -76,15 +76,8 @@ const Header = (props: Props) => {
           <Bars3Icon className="h-6 mr-1" />
           All
         </p>
-        <p className="link">Movies & TV</p>
-        <p className="link">Sports & Outdoors</p>
-        <p className="link">Deals Store</p>
-        <p className="link hidden md:inline-flex">Buy Again</p>
-        <p className="link hidden md:inline-flex">Beauty & Personal Care</p>
-        <p className="link hidden lg:inline-flex">Health & Household</p>
-        <p className="link hidden lg:inline-flex">Grocery</p>
-        <p className="link hidden lg:inline-flex">Work Supplies</p>
-        <p className="link hidden lg:inline-flex">Books</p>
+        <p className="link">Pokémon</p>
+        <p className="link">Yu-Gi-Oh</p>
       </div>
     </header>
   );

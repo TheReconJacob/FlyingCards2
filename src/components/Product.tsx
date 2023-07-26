@@ -53,13 +53,6 @@ const Product: React.FC<Props> = ({ product }: Props) => {
           alt={title}
         />
         <h4 className="my-3">{title}</h4>
-        <div className="flex">
-          {Array(Math.round(rate))
-            .fill(0)
-            .map((_, i) => (
-              <StarIcon key={i.toString()} className="h-5 text-yellow-500" />
-            ))}
-        </div>
         <p className="text-xs my-2 line-clamp-2">{description}</p>
         <div className="mb-5">
           {numeral(price).format('£0,0.00')}

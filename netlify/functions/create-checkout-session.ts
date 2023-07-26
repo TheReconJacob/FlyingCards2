@@ -56,6 +56,18 @@ exports.handler = async (
   });
 
   try {
+    // Get unique image URLs
+    let uniqueImageUrls = Array.from(
+      new Set(items.map((item: IProduct) => item.image))
+    );
+
+    // Remove image URLs until the `images` field is under the 500 character limit
+    let imagesField = JSON.stringify(uniqueImageUrls);
+    while (imagesField.length > 500 && uniqueImageUrls.length > 0) {
+      uniqueImageUrls.pop();
+      imagesField = JSON.stringify(uniqueImageUrls);
+    }
+    
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       // Restrict allowed shipping countries to only include the selected shipping country
@@ -69,9 +81,7 @@ exports.handler = async (
       metadata: {
         email,
         // Only include unique image URLs in the `images` field
-        images: JSON.stringify(
-          Array.from(new Set(items.map((item: IProduct) => item.image)))
-        ),
+        images: imagesField,
       },
     });
 

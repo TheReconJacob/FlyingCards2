@@ -80,8 +80,9 @@ exports.handler = async (
       cancel_url: `${process.env.HOST}/checkout`,
       metadata: {
         email,
-        // Only include unique image URLs in the `images` field
         images: imagesField,
+        itemIds: JSON.stringify(items.map((item: IProduct) => item.id)),
+        quantities: JSON.stringify(transformedItems.map((item: IProduct) => item.quantity)),
       },
     });
 

@@ -49,37 +49,7 @@ const fulfillOrder = async (session: any) => {
   // Define the app variable
   const app = await appPromise;
 
-  // Get purchased items from checkout session
-  const stripe = await stripePromise;
-  const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-  const items = lineItems.data.map((item: Stripe.LineItem) => ({
-    name: item.description,
-    quantity: item.quantity,
-  }));
-
-  // Update quantity value of each item in Firebase
-  for (const item of items) {
-    // Get item document from Firebase
-    const itemDoc = await admin
-      .firestore()
-      .collection("items")
-      .doc(item.name)
-      .get();
-
-    if (itemDoc.exists) {
-      // Check if item quantity is defined and not null
-      if (item.quantity !== null) {
-        // Decrement item quantity by purchased quantity
-        await itemDoc.ref.update({
-          quantity: admin.firestore.FieldValue.increment(-item.quantity!),
-        });
-      }
-    }
-  }
-
-  console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
-
-  return app
+  await app
     .firestore()
     .collection("users")
     .doc(session.metadata.email)
@@ -90,10 +60,50 @@ const fulfillOrder = async (session: any) => {
       amount_shipping: session.total_details.amount_shipping / 100,
       images: JSON.parse(session.metadata.images),
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    })
-    .then(() => {
-      console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
     });
+
+  console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
+
+  // Parse item IDs and quantities from checkout session metadata
+  const itemIds = JSON.parse(session.metadata.itemIds);
+  const quantities = JSON.parse(session.metadata.quantities);
+
+  // Get purchased items from checkout session
+  const stripe = await stripePromise;
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+  const items = lineItems.data.map((item: Stripe.LineItem) => ({
+    name: item.description,
+    quantity: item.quantity,
+  }));
+
+  // Update quantity value of each item in Firebase
+  for (const [index, itemId] of itemIds.entries()) {
+    // Query products collection by id field
+    const itemQuery = admin
+      .firestore()
+      .collection("products")
+      .where("id", "==", itemId);
+    const itemQuerySnapshot = await itemQuery.get();
+
+    // Check if query returned any documents
+    if (!itemQuerySnapshot.empty) {
+      // Get first document from query snapshot
+      const itemDoc = itemQuerySnapshot.docs[0];
+
+      // Find the corresponding quantity in the quantities array
+      const quantity = quantities[index];
+
+      // Check if quantity is defined and not null
+      if (quantity !== null) {
+        // Decrement item quantity by purchased quantity
+        await itemDoc.ref.update({
+          quantity: admin.firestore.FieldValue.increment(-quantity),
+        });
+      }
+    }
+  }
+
+  console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
 };
 
 exports.handler = async (event: APIGatewayProxyEvent, context: Context, callback: Callback) => {

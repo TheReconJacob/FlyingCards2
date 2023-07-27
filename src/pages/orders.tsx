@@ -63,6 +63,7 @@ export const getServerSideProps = async (
   const orders = await Promise.all(
     stripeOrders.docs.map(async (order: any) => ({
       id: order.id,
+      title: order.data().title,
       amount: order.data().amount,
       amount_shipping: order.data().amount_shipping,
       images: order.data().images,

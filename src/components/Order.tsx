@@ -20,15 +20,13 @@ const Order = ({ order }: Props) => {
         <div>
           <p className="text-xs font-bold">TOTAL</p>
           <p>
-            {numeral(order.amount).format('£0,0.00')} - One-Day Delivery{" "}
-            {numeral(order.amount_shipping).format('£0,0.00')}
+            £{numeral(order.amount).format('£0,0.00')}
           </p>
         </div>
 
         <p className="text-sm whitespace-nowrap sm:text-lg self-end flex-1 text-right text-fast_blue-light">
-          {order.items.length} items
+          {order.items.length-1} item(s)
         </p>
-
         <p className="absolute top-2 right-2 w-40 lg:w-72 truncate text-xs whitespace-nowrap">
           ORDER ID: {order.id}
         </p>
@@ -46,6 +44,9 @@ const Order = ({ order }: Props) => {
               height={80}
             />
           ))}
+          <p>
+          {order.title}
+          </p>
         </div>
       </div>
     </div>

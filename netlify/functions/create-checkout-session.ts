@@ -81,6 +81,7 @@ exports.handler = async (
       metadata: {
         email,
         images: imagesField,
+        title: JSON.stringify(items.map((item: IProduct) => item.title)),
         itemIds: JSON.stringify(items.map((item: IProduct) => item.id)),
         quantities: JSON.stringify(transformedItems.map((item: IProduct) => item.quantity)),
       },

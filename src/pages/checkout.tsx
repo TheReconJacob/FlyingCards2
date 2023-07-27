@@ -6,7 +6,7 @@ import numeral from "numeral";
 import { useDispatch, useSelector } from "react-redux";
 import CheckoutProduct from "../components/CheckoutProduct";
 import Header from "../components/Header";
-import { emptyBasket, selectItems, selectTotal } from "../slices/basketSlice";
+import { selectItems, selectTotal } from "../slices/basketSlice";
 
 let stripePromise: Promise<Stripe | null>;
 
@@ -35,17 +35,9 @@ const Checkout = (props: Props) => {
       );
       const stripe = await stripePromise;
       // Redirect user/customer to Stripe Checkout
-      const result = await stripe!.redirectToCheckout({
+      await stripe!.redirectToCheckout({
         sessionId: checkoutSession.data.id,
       });
-
-      if (result.error) {
-        alert(result.error.message);
-      } else {
-        // Payment was successful
-        // Empty the user's basket
-        dispatch(emptyBasket());
-      }
     } catch (error) {
       console.error("Error creating checkout session:", error);
     }
@@ -60,7 +52,7 @@ const Checkout = (props: Props) => {
           <div className="flex flex-col p-5 space-y-10 bg-white">
             <h1 className="text-3xl border-b pb-4">
               {items.length === 0
-                ? "Your Fast Basket is empty."
+                ? "Your Basket is empty."
                 : "Shopping Basket"}
             </h1>
             {items.map((item) => (

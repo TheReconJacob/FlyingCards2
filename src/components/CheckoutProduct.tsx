@@ -58,7 +58,7 @@ const CheckoutProduct = ({ product }: Props) => {
       <div className="col-span-3 mx-5">
         <p>{title}</p>
         <p className="text-xs my-2 line-clamp-3">{description}</p>
-        {numeral(price).format('£0,0.00')}
+        £{numeral(price).format('£0,0.00')}
       </div>
       {/* Right */}
       <div className="flex flex-col space-y-2 my-auto justify-self-end">

@@ -55,7 +55,7 @@ const Product: React.FC<Props> = ({ product }: Props) => {
         <h4 className="my-3">{title}</h4>
         <p className="text-xs my-2 line-clamp-2">{description}</p>
         <div className="mb-5">
-          {numeral(price).format('£0,0.00')}
+          £{numeral(price).format('£0,0.00')}
         </div>
         <p className="text-sm my-2">Available Quantity: {quantity}</p>
         <button onClick={addItemToBasket} className="mt-auto button">

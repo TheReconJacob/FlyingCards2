@@ -1,11 +1,21 @@
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/router";
 import Header from "../components/Header";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { emptyBasket } from "../slices/basketSlice";
 
 type Props = {};
 
 const success = (props: Props) => {
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Empty the user's basket
+    dispatch(emptyBasket());
+  }, [dispatch]);
+
   return (
     <div className="bg-gray-100 h-screen">
       <Header />
@@ -19,7 +29,7 @@ const success = (props: Props) => {
             </h1>
           </div>
           <p>
-            Thank you for shopping with us. We'll send a confirmation once your item has shipped, if you would like to check the status of your order(s) please press the link below.
+            Thank you for shopping with us. If you would like to see your order(s), please press the link below.
           </p>
           <button onClick={()=>router.push("/orders")} className="button mt-8">Go to my orders</button>
         </div>

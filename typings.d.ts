@@ -15,6 +15,7 @@ export interface IProduct {
 
 export interface IOrder {
   id: number;
+  title: string;
   amount: number;
   amount_shipping: number;
   items: { [key: string]: any };

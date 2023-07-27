@@ -49,22 +49,6 @@ const fulfillOrder = async (session: any) => {
   // Define the app variable
   const app = await appPromise;
 
-  return app
-    .firestore()
-    .collection("users")
-    .doc(session.metadata.email)
-    .collection("orders")
-    .doc(session.id)
-    .set({
-      amount: session.amount_total / 100,
-      amount_shipping: session.total_details.amount_shipping / 100,
-      images: JSON.parse(session.metadata.images),
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    })
-    .then(() => {
-      console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
-    });
-
   // Get purchased items from checkout session
   const stripe = await stripePromise;
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
@@ -94,6 +78,22 @@ const fulfillOrder = async (session: any) => {
   }
 
   console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
+
+  return app
+    .firestore()
+    .collection("users")
+    .doc(session.metadata.email)
+    .collection("orders")
+    .doc(session.id)
+    .set({
+      amount: session.amount_total / 100,
+      amount_shipping: session.total_details.amount_shipping / 100,
+      images: JSON.parse(session.metadata.images),
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    })
+    .then(() => {
+      console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
+    });
 };
 
 exports.handler = async (event: APIGatewayProxyEvent, context: Context, callback: Callback) => {

@@ -52,7 +52,7 @@ export const getServerSideProps = async (
     };
   }
 
-  // // Firebase db
+  // Firebase db
   const stripeOrdersQuery = query(
     collection(doc(collection(db, "users"), session.user.email), "orders"),
     orderBy("timestamp", "desc")
@@ -62,7 +62,7 @@ export const getServerSideProps = async (
   // Stripe orders
   const orders = await Promise.all(
     stripeOrders.docs.map(async (order: any) => ({
-      id: order.id,
+      id: order.data().id,
       title: order.data().title,
       amount: order.data().amount,
       amount_shipping: order.data().amount_shipping,

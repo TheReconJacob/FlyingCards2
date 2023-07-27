@@ -49,19 +49,32 @@ const fulfillOrder = async (session: any) => {
   // Define the app variable
   const app = await appPromise;
 
-  await app
-    .firestore()
-    .collection("users")
-    .doc(session.metadata.email)
-    .collection("orders")
-    .doc(session.id)
-    .set({
-      amount: session.amount_total / 100,
-      amount_shipping: session.total_details.amount_shipping / 100,
-      images: JSON.parse(session.metadata.images),
-      title: JSON.parse(session.metadata.title),
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    });
+  // Get the id of the Stripe Payment object
+  const stripe = await stripePromise;
+  const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+
+  if (
+    paymentIntent.charges &&
+    paymentIntent.charges.data.length > 0 &&
+    paymentIntent.charges.data[0].payment_method
+  ) {
+    const paymentId = paymentIntent.charges.data[0].payment_method as string;
+
+    await app
+      .firestore()
+      .collection("users")
+      .doc(session.metadata.email)
+      .collection("orders")
+      .doc(session.id)
+      .set({
+        amount: session.amount_total / 100,
+        amount_shipping: session.total_details.amount_shipping / 100,
+        images: JSON.parse(session.metadata.images),
+        title: JSON.parse(session.metadata.title),
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        id: paymentId,
+      });
+  }
 
   console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
 
@@ -70,7 +83,6 @@ const fulfillOrder = async (session: any) => {
   const quantities = JSON.parse(session.metadata.quantities);
 
   // Get purchased items from checkout session
-  const stripe = await stripePromise;
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
   const items = lineItems.data.map((item: Stripe.LineItem) => ({
     name: item.description,
@@ -139,7 +151,7 @@ exports.handler = async (event: APIGatewayProxyEvent, context: Context, callback
     if (stripeEvent.type === "checkout.session.completed") {
       const session = stripeEvent.data.object;
 
-      // Fullfil order
+      // Fullfill order
       return fulfillOrder(session)
         .then(() => callback(null, { statusCode: 200 }))
         .catch((err) => {

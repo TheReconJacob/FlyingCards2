@@ -71,6 +71,7 @@ const Checkout = (props: Props) => {
                   id="shipping-country"
                   value={shippingCountry}
                   onChange={(e) => setShippingCountry(e.target.value)}
+                  required
                 >
                   <option value="">Select a country</option>
                   <option value="GB">United Kingdom</option>

@@ -18,6 +18,11 @@ const Header = (props: Props) => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const items = useSelector(selectItems);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = () => {
+    router.push(`/search?q=${searchQuery}`);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -48,8 +53,11 @@ const Header = (props: Props) => {
           <input
             type="text"
             className="bg-white p-2 h-full w-6 flex-grow flex-shrink rounded-l-md focus:outline-none px-4"
+            value={searchQuery}
+            onChange={event => setSearchQuery(event.target.value)}
+            onKeyDown={event => event.key === 'Enter' && handleSearch()}
           />
-          <MagnifyingGlassIcon className="h-12 p-4" />
+          <MagnifyingGlassIcon className="h-12 p-4" onClick={handleSearch} />
         </div>
         {/* right menu */}
         <div className="text-white flex items-center text-xs space-x-6 mx-6 whitespace-nowrap">

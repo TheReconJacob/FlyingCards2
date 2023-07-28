@@ -20,6 +20,7 @@ const CategoryPage = ({ products }: Props) => {
       <Header />
       <main className="max-w-screen-2xl mx-auto">
         <Banner />
+        <h1 className="text-3xl font-bold mt-4 mb-6">{category}</h1>
         <ProductFeed products={products} />
       </main>
     </div>

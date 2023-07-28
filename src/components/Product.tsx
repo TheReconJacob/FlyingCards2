@@ -1,5 +1,6 @@
 import numeral from "numeral";
 import { useDispatch, useSelector } from "react-redux";
+import { useSession } from "next-auth/react";
 import { IProduct } from "../../typings";
 import { addToBasket, selectItems } from "../slices/basketSlice";
 
@@ -13,6 +14,9 @@ const Product: React.FC<Props> = ({ product }: Props) => {
   
   // Call useSelector at the top level of the component
   const basketItems = useSelector(selectItems);
+
+  // Get session data
+  const { data: session } = useSession();
 
   const addItemToBasket = () => {
     let product: IProduct = {
@@ -34,11 +38,11 @@ const Product: React.FC<Props> = ({ product }: Props) => {
       // Send product to Redux Store as a basket slice action
       dispatch(addToBasket({...product}));
     } else {
-      console.warn(`Can't add more than ${quantity} of product (id: ${id}) to basket`);
+      alert(`Can't add more than ${quantity} of product (id: ${id}) to basket`);
     }
   };
 
-  if (quantity === 0) return null;
+  if (quantity === 0 && session?.user.email !== process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL) return null;
 
   return (
     <>

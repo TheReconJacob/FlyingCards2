@@ -32,7 +32,7 @@ export const basketSlice = createSlice({
         // the item exists in the basket, remove it
         newBasket.splice(index, 1);
       } else {
-        console.warn(
+        alert(
           `Can't remove product (id: ${action.payload.id}) as its not in the basket`
         );
       }

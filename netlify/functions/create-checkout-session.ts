@@ -86,9 +86,24 @@ exports.handler = async (
       metadata: {
         email,
         images: imagesField,
-        title: JSON.stringify(items.map((item: IProduct) => item.title)),
-        itemIds: JSON.stringify(items.map((item: IProduct) => item.id)),
-        quantities: JSON.stringify(transformedItems.map((item: IProduct) => item.quantity)),
+        title: JSON.stringify(
+          items
+              .map((item: IProduct) => item.title)
+              .join(", ")
+              .slice(0, 400) + (items.length > 1 ? "..." : "")
+        ),
+        itemIds: JSON.stringify(
+          items
+              .map((item: IProduct) => item.id)
+              .join(", ")
+              .slice(0, 400) + (items.length > 1 ? "..." : "")
+        ),
+        quantities: JSON.stringify(
+            transformedItems
+                .map((item: IProduct) => item.quantity)
+                .join(", ")
+                .slice(0, 400) + (transformedItems.length > 1 ? "..." : "")
+        ),      
       },
     });
 

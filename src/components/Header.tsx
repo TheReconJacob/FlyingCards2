@@ -8,10 +8,12 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { selectItems } from "../slices/basketSlice";
+import { useState } from "react";
 
 type Props = {};
 
 const Header = (props: Props) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { data: session, status } = useSession();
   const loading = status === "loading";
   const router = useRouter();
@@ -42,11 +44,26 @@ const Header = (props: Props) => {
         {/* right menu */}
         <div className="text-white flex items-center text-xs space-x-6 mx-6 whitespace-nowrap">
           <div
-            onClick={!session ? () => signIn() : () => signOut()}
-            className="link"
+            onMouseEnter={() => setDropdownOpen(true)}
+            onMouseLeave={() => setDropdownOpen(false)}
+            className="link relative"
           >
-            <p>{session ? `Hello, ${session.user.name}` : "Sign In"}</p>
-            <p className="font-extrabold md:text-sm">Account & Lists</p>
+            {session ? (
+              <>
+                <p className="font-extrabold text-sm mt-2">Hello, {session.user.name}</p>
+                {dropdownOpen && (
+                  <div className="absolute top-full right-0 bg-[#1d2298] text-white p-2 rounded-md shadow-md">
+                    <button onClick={() => signOut()} className="link">
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <button onClick={() => signIn()} className="link">
+                <p className="font-extrabold text-sm mt-2">Sign In</p>
+              </button>
+            )}
           </div>
           <div
             onClick={() => session && router.push("/orders")}

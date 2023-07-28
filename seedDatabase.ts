@@ -11,9 +11,6 @@ export const seedDatabase = async () => {
     description: 'Product Description',
     category: 'Product Category',
     image: 'Product Image URL',
-    rating: {
-      rate: 4.5,
-    },
   };
 
   const snapshot = await productsRef.where('id', '==', productData.id).get();

@@ -1,4 +1,3 @@
-import { StarIcon } from "@heroicons/react/24/solid";
 import numeral from "numeral";
 import { useDispatch, useSelector } from "react-redux";
 import { IProduct } from "../../typings";
@@ -9,25 +8,24 @@ type Props = {
 };
 
 const CheckoutProduct = ({ product }: Props) => {
-  const { id, title, price, description, category, image, rating, hasFast, quantity } = product;
-  const { rate } = rating;
+  const { id, title, price, description, category, image, quantity } = product;
   const dispatch = useDispatch();
   
   // Call useSelector at the top level of the component
   const basketItems = useSelector(selectItems);
 
   const addItemToBasket = () => {
-    const product = {
+    let product: IProduct = {
       id,
       title,
       price,
-      description,
       category,
       image,
-      rating,
-      hasFast,
       quantity,
     };
+    if (description) {
+      product.description = description;
+    }
     
     // Check if there are enough items available before adding to basket
     const itemCount = basketItems.filter(item => item.id === id).length;
@@ -57,7 +55,7 @@ const CheckoutProduct = ({ product }: Props) => {
       {/* middle */}
       <div className="col-span-3 mx-5">
         <p>{title}</p>
-        <p className="text-xs my-2 line-clamp-3">{description}</p>
+        {description && <p className="text-xs my-2 line-clamp-3">{description}</p>}
         £{numeral(price).format('£0,0.00')}
       </div>
       {/* Right */}

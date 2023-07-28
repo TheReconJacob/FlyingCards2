@@ -84,10 +84,6 @@ const fulfillOrder = async (session: any) => {
 
   // Get purchased items from checkout session
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-  const items = lineItems.data.map((item: Stripe.LineItem) => ({
-    name: item.description,
-    quantity: item.quantity,
-  }));
 
   // Update quantity value of each item in Firebase
   for (const [index, itemId] of itemIds.entries()) {

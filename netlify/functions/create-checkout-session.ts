@@ -30,18 +30,23 @@ exports.handler = async (
   // Calculate shipping cost based on selected shipping country
   let shippingCost = calculate_shipping(items.length, shippingCountry);
 
-  const transformedItems = items.map((item: IProduct) => ({
-    price_data: {
-      currency: "gbp",
-      unit_amount: item.price * 100,
-      product_data: {
-        name: item.title,
-        description: item.description,
-        images: [item.image],
+  const transformedItems = items.map((item: IProduct) => {
+    let product_data: { name: string; images: string[]; description?: string } = {
+      name: item.title,
+      images: [item.image],
+    };
+    if (item.description) {
+      product_data.description = item.description;
+    }
+    return {
+      price_data: {
+        currency: "gbp",
+        unit_amount: item.price * 100,
+        product_data,
       },
-    },
-    quantity: 1,
-  }));
+      quantity: 1,
+    };
+  });  
 
   // Add a line item for the shipping cost
   transformedItems.push({

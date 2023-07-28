@@ -130,21 +130,21 @@ shipping_cost=3.75;
 } else {
 if(quantity <=21)
 {
-shipping_cost=5.00;
+shipping_cost=2.10;
 }
 else if (quantity >=22 && quantity <=55){
-shipping_cost=7.00;
+shipping_cost=12.00;
 }
 else if(quantity >55 && quantity <=108)
 {
-shipping_cost=9.00;
+shipping_cost=12.00;
 }
 else if(quantity >108 && quantity <=159)
 {
-shipping_cost=11.00;
+shipping_cost=12.00;
 }
 else{
-shipping_cost=13.00;
+shipping_cost=12.00;
 }
 }
 return shipping_cost;

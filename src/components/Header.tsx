@@ -8,16 +8,26 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { selectItems } from "../slices/basketSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {};
 
 const Header = (props: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
   const { data: session, status } = useSession();
-  const loading = status === "loading";
   const router = useRouter();
   const items = useSelector(selectItems);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await fetch('/.netlify/functions/categories');
+      const categories = await res.json();
+      setCategories(categories);
+    };
+    
+    fetchCategories();
+  }, []);  
 
   return (
     <header>
@@ -93,8 +103,9 @@ const Header = (props: Props) => {
           <Bars3Icon className="h-6 mr-1" />
           All
         </p>
-        <p className="link">Pokémon</p>
-        <p className="link">Yu-Gi-Oh</p>
+        {categories.map(category => (
+          <p key={category} className="link" onClick={() => router.push(`/category/${category}`)}>{category}</p>
+        ))}
       </div>
     </header>
   );

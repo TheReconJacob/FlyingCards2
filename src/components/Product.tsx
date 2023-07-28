@@ -41,6 +41,8 @@ const Product: React.FC<Props> = ({ product }: Props) => {
     }
   };
 
+  if (quantity === 0) return null;
+
   return (
     <>
       <div className="relative flex flex-col m-5 bg-white z-30 p-10">

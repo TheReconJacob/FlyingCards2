@@ -30,6 +30,9 @@ exports.handler = async (
   // Calculate shipping cost based on selected shipping country
   let shippingCost = calculate_shipping(items.length, shippingCountry);
 
+  // Cut off shippingCost to 2 decimal places
+  shippingCost = Math.floor(shippingCost * 100) / 100;
+
   const transformedItems = items.map((item: IProduct) => {
     let product_data: { name: string; images: string[]; description?: string } = {
       name: item.title,
@@ -38,15 +41,19 @@ exports.handler = async (
     if (item.description) {
       product_data.description = item.description;
     }
+    
+    // Cut off item.price to 2 decimal places
+    let price = Math.floor(item.price * 100) / 100;
+    
     return {
       price_data: {
         currency: "gbp",
-        unit_amount: item.price * 100,
+        unit_amount: Math.trunc(price * 100),
         product_data,
       },
       quantity: 1,
     };
-  });  
+  });
 
   // Add a line item for the shipping cost
   transformedItems.push({
@@ -55,7 +62,7 @@ exports.handler = async (
       product_data: {
         name: "Shipping",
       },
-      unit_amount: shippingCost * 100,
+      unit_amount: Math.trunc(shippingCost * 100),
     },
     quantity: 1,
   });

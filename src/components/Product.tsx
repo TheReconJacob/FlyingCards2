@@ -38,7 +38,7 @@ const Product: React.FC<Props> = ({ product }: Props) => {
       // Send product to Redux Store as a basket slice action
       dispatch(addToBasket({...product}));
     } else {
-      alert(`Can't add more than ${quantity} of product (id: ${id}) to basket`);
+      alert(`Can't add more than ${quantity} of this product to basket`);
     }
   };
 

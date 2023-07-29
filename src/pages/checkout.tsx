@@ -319,7 +319,13 @@ const Checkout = (props: Props) => {
               </h2>
               <button
                 role="link"
-                onClick={createCheckoutSession}
+                onClick={() => {
+                  if (shippingCountry === "") {
+                    alert("Please select a country");
+                  } else {
+                    createCheckoutSession();
+                  }
+                }}
                 disabled={!session}
                 className={`button mt-2 ${
                   !session &&

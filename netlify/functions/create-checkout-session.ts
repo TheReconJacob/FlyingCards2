@@ -150,7 +150,7 @@ shipping_cost=3.75;
 } else {
 if(quantity <=21)
 {
-shipping_cost=2.10;
+shipping_cost=3.20;
 }
 else if (quantity >=22 && quantity <=55){
 shipping_cost=12.00;

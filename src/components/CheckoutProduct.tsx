@@ -34,7 +34,7 @@ const CheckoutProduct = ({ product }: Props) => {
       // Send product id to Redux Store to remove from basket
       dispatch(addToBasket(product));
     } else {
-      alert(`Can't add more than ${quantity} of product (id: ${id}) to basket`);
+      alert(`Can't add more than ${quantity} of this product to basket`);
     }
   };
   

@@ -1,19 +1,21 @@
-import { GetServerSidePropsContext } from "next";
-import { useRouter } from "next/router";
-import { IProduct, ISession } from "../../../typings";
-import Banner from "../../components/Banner";
-import Header from "../../components/Header";
-import ProductFeed from "../../components/ProductFeed";
-import admin from '../../../firebaseAdmin';
+import { useRouter } from 'next/router';
+import { IProduct } from '../../../typings';
+import Banner from '../../components/Banner';
+import Header from '../../components/Header';
+import ProductFeed from '../../components/ProductFeed';
 import React from 'react';
+import { useProductContext } from '../../components/context/ProductContext'; // Import the useProductContext
+import { useFetchProducts } from '../../hooks/UseFetchProducts'; // Import the useFetchProducts custom hook
 
-type Props = {
-  products: IProduct[];
-};
-
-const CategoryPage = ({ products }: Props) => {
+const CategoryPage = () => {
   const router = useRouter();
   const { category } = router.query;
+
+  // Call the custom hook to set up the real-time listener and fetch data from Firebase
+  useFetchProducts();
+
+  // Use the product context to get the products and loading state
+  const { products, loading, error } = useProductContext();
 
   return (
     <div className="bg-gray-100">
@@ -28,19 +30,3 @@ const CategoryPage = ({ products }: Props) => {
 };
 
 export default CategoryPage;
-
-export const getServerSideProps = async (
-    context: GetServerSidePropsContext
-) => {
-        const category = context.params?.category as string;
-
-        const db = admin.firestore();
-        const productsRef = db.collection('products');
-        const snapshot = await productsRef.where('category', '==', category).get();
-        const products = snapshot.docs.map(doc => doc.data());
-        return {
-        props: {
-            products,
-        },
-    };
-};  

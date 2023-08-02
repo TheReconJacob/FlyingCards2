@@ -1,4 +1,5 @@
 import { IProduct } from "../../typings";
+import Big from "big.js";
 
 type NextApiRequest = {
   body: any;
@@ -30,8 +31,8 @@ exports.handler = async (
   // Calculate shipping cost based on selected shipping country
   let shippingCost = calculate_shipping(items.length, shippingCountry);
 
-  // Cut off shippingCost to 2 decimal places
-  shippingCost = Math.floor(shippingCost * 100) / 100;
+  // Round shippingCost to 2 decimal places using big.js
+  shippingCost = new Big(shippingCost).round(2);
 
   const transformedItems = items.map((item: IProduct) => {
     let product_data: { name: string; images: string[]; description?: string } = {
@@ -42,13 +43,13 @@ exports.handler = async (
       product_data.description = item.description;
     }
     
-    // Cut off item.price to 2 decimal places
-    let price = Math.floor(item.price * 100) / 100;
+    // Round item.price to 2 decimal places using big.js
+    let price = new Big(item.price).round(2);
     
     return {
       price_data: {
         currency: "gbp",
-        unit_amount: Math.trunc(price * 100),
+        unit_amount: price.times(100).toFixed(0),
         product_data,
       },
       quantity: 1,
@@ -62,7 +63,7 @@ exports.handler = async (
       product_data: {
         name: "Shipping",
       },
-      unit_amount: Math.trunc(shippingCost * 100),
+      unit_amount: shippingCost.times(100).toFixed(0),
     },
     quantity: 1,
   });
@@ -80,6 +81,9 @@ exports.handler = async (
       imagesField = JSON.stringify(uniqueImageUrls);
     }
     
+    const itemIds = items.map((item: IProduct) => item.id);
+    const quantities = transformedItems.map((item: IProduct) => item.quantity);
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       // Restrict allowed shipping countries to only include the selected shipping country
@@ -95,22 +99,12 @@ exports.handler = async (
         images: imagesField,
         title: JSON.stringify(
           items
-              .map((item: IProduct) => item.title)
-              .join(", ")
-              .slice(0, 400) + (items.length > 1 ? "..." : "")
+            .map((item: IProduct) => item.title)
+            .join(", ")
+            .slice(0, 400) + (items.length > 1 ? "..." : "")
         ),
-        itemIds: JSON.stringify(
-          items
-              .map((item: IProduct) => item.id)
-              .join(", ")
-              .slice(0, 400) + (items.length > 1 ? "..." : "")
-        ),
-        quantities: JSON.stringify(
-            transformedItems
-                .map((item: IProduct) => item.quantity)
-                .join(", ")
-                .slice(0, 400) + (transformedItems.length > 1 ? "..." : "")
-        ),      
+        itemIds: JSON.stringify(itemIds),
+        quantities: JSON.stringify(quantities),  
       },
     });
 
@@ -132,47 +126,33 @@ exports.handler = async (
   }
 };
 
-function calculate_shipping(quantity:number, country:string) : number{
-// Calculate shipping cost based on quantity and country
-let shipping_cost = 0;
-if (country === 'GB') {
-if(quantity <= 21)
-{
-shipping_cost = 1.00;
-}
-else if (quantity >= 22 && quantity <= 55) {
-shipping_cost = 2.10;
-}
-else if(quantity > 55 && quantity <= 108)
-{
-shipping_cost = 2.65;
-}
-else if(quantity >108 && quantity <=159)
-{
-shipping_cost =2.95;
-}
-else{
-shipping_cost=3.75;
-}
-} else {
-if(quantity <=21)
-{
-shipping_cost=3.20;
-}
-else if (quantity >=22 && quantity <=55){
-shipping_cost=12.00;
-}
-else if(quantity >55 && quantity <=108)
-{
-shipping_cost=12.00;
-}
-else if(quantity >108 && quantity <=159)
-{
-shipping_cost=12.00;
-}
-else{
-shipping_cost=12.00;
-}
-}
-return shipping_cost;
+function calculate_shipping(quantity: number, country: string): Big {
+  // Calculate shipping cost based on quantity and country
+  let shipping_cost = new Big(0);
+  if (country === "GB") {
+    if (quantity <= 21) {
+      shipping_cost = new Big(1.0);
+    } else if (quantity >= 22 && quantity <= 55) {
+      shipping_cost = new Big(2.1);
+    } else if (quantity > 55 && quantity <= 108) {
+      shipping_cost = new Big(2.65);
+    } else if (quantity > 108 && quantity <= 159) {
+      shipping_cost = new Big(2.95);
+    } else {
+      shipping_cost = new Big(3.75);
+    }
+  } else {
+    if (quantity <= 21) {
+      shipping_cost = new Big(3.2);
+    } else if (quantity >= 22 && quantity <= 55) {
+      shipping_cost = new Big(12.0);
+    } else if (quantity > 55 && quantity <= 108) {
+      shipping_cost = new Big(12.0);
+    } else if (quantity > 108 && quantity <= 159) {
+      shipping_cost = new Big(12.0);
+    } else {
+      shipping_cost = new Big(12.0);
+    }
+  }
+  return shipping_cost;
 }

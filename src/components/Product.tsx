@@ -46,7 +46,7 @@ const Product: React.FC<Props> = ({ product }: Props) => {
 
   return (
     <>
-      <div className="relative flex flex-col m-5 bg-white z-30 p-10">
+      <div className="relative flex flex-col items-center m-2 bg-white z-30 p-6 w-5/12 md:w-1/5">
         <p className="absolute top-2 right-2 text-xs italic text-gray-400">
           {category}
         </p>
@@ -55,12 +55,12 @@ const Product: React.FC<Props> = ({ product }: Props) => {
           src={image}
           alt={title}
         />
-        <h4 className="my-3">{title}</h4>
-        {description && <p className="text-xs my-2 line-clamp-2">{description}</p>}
-        <div className="mb-5">
+        <h4 className="my-2 text-center">{title}</h4>
+        {description && <p className="text-xs my-1 line-clamp-2 text-center">{description}</p>}
+        <div className="mb-3 text-center">
           £{numeral(price).format('£0,0.00')}
         </div>
-        <p className="text-sm my-2">Available Quantity: {quantity}</p>
+        <p className="text-sm my-1 text-center">Available Quantity: {quantity}</p>
         <button onClick={addItemToBasket} className="mt-auto button">
           Add to Basket
         </button>

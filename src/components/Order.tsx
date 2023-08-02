@@ -9,12 +9,6 @@ type Props = {
 const Order = ({ order }: Props) => {
   return (
     <div className="relative border rounded-md">
-      <div className="p-5 bg-gray-100 text-sm text-gray-600">
-        <p>
-          If you have an issue inquiry, please email me at{" "}
-          <a href="mailto:flyingcards@gmail.com">flyingcards@gmail.com</a>. Please include your Order ID if it's related to your order.
-        </p>
-      </div>
       <div className="flex items-center space-x-10 p-5 bg-gray-100 text-sm text-gray-600">
         <div>
           <p className="font-bold text-xs">ORDER PLACED</p>
@@ -31,7 +25,7 @@ const Order = ({ order }: Props) => {
         </div>
 
         <p className="text-sm whitespace-nowrap sm:text-lg self-end flex-1 text-right text-fast_blue-light">
-          {order.items.length-1} item(s)
+          {order.images.length} item(s)
         </p>
         <p className="absolute top-2 right-2 w-40 lg:w-72 truncate text-xs whitespace-nowrap">
           ORDER ID: {order.id}

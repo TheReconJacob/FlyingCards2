@@ -13,7 +13,6 @@ export interface IOrder {
   title: string;
   amount: number;
   amount_shipping: number;
-  items: { [key: string]: any };
   timestamp: number;
   images: string[];
 }

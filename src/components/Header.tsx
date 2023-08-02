@@ -55,7 +55,12 @@ const Header = (props: Props) => {
             className="bg-white p-2 h-full w-6 flex-grow flex-shrink rounded-l-md focus:outline-none px-4"
             value={searchQuery}
             onChange={event => setSearchQuery(event.target.value)}
-            onKeyDown={event => event.key === 'Enter' && handleSearch()}
+            onKeyDown={event => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                handleSearch();
+              }
+            }}
           />
           <MagnifyingGlassIcon className="h-12 p-4" onClick={handleSearch} />
         </div>
@@ -105,15 +110,37 @@ const Header = (props: Props) => {
           </div>
         </div>
       </div>
-      {/* bottom nav */}
-      <div className="flex items-center space-x-3 p-2 pl-6 bg-[#4c4fbd] text-white text-sm">
-        <p className="flex items-center">
-          <Bars3Icon className="h-6 mr-1" />
-          All
-        </p>
-        {categories.map(category => (
-          <p key={category} className="link" onClick={() => router.push(`/category/${category}`)}>{category}</p>
-        ))}
+      {/* mobile search and Banner*/}
+      <div className="bg-[#1d2298]">
+        {/* mobile search */}
+        <div className="md:hidden flex justify-center px-4 bg-[#1d2298] mb-2">
+          <div className="flex items-center h-10 rounded-md flex-grow cursor-pointer bg-[#4c4fbd] hover:bg-[#6c6fdd]">
+            <input
+              type="text"
+              className="bg-white p-2 h-full w-6 flex-grow flex-shrink rounded-l-md focus:outline-none px-4"
+              value={searchQuery}
+              onChange={event => setSearchQuery(event.target.value)}
+              onKeyDown={event => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  handleSearch();
+                }
+              }}
+            />
+            <div
+              className="flex items-center justify-center rounded-md cursor-pointer bg-[#4c4fbd] hover:bg-[#6c6fdd]"
+              style={{ width: '2.5rem', height: '2.5rem' }}
+            >
+              <MagnifyingGlassIcon className="h-6" onClick={handleSearch} />
+            </div>
+          </div>
+        </div>
+        {/* bottom nav */}
+        <div className="flex items-center space-x-3 p-2 pl-6 bg-[#4c4fbd] text-white text-sm">
+          {categories.map(category => (
+            <p key={category} className="link" onClick={() => router.push(`/category/${category}`)}>{category}</p>
+          ))}
+        </div>
       </div>
     </header>
   );

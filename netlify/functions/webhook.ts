@@ -74,6 +74,26 @@ const fulfillOrder = async (session: any) => {
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
         id: paymentId,
       });
+
+    // Update the last updated timestamp for the user's orders
+    const lastUpdatedRef = app.firestore().collection('lastUpdated');
+    const lastUpdatedQuery = lastUpdatedRef
+      .where('type', '==', 'orders')
+      .where('email', '==', session.metadata.email);
+    const lastUpdatedSnapshot = await lastUpdatedQuery.get();
+    const lastUpdatedDoc = lastUpdatedSnapshot.docs[0];
+    if (lastUpdatedDoc) {
+      await lastUpdatedDoc.ref.update({
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } else {
+      // Timestamp does not exist, create it
+      await lastUpdatedRef.add({
+        type: 'orders',
+        email: session.metadata.email,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
   }
 
   console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
@@ -108,7 +128,24 @@ const fulfillOrder = async (session: any) => {
         await itemDoc.ref.update({
           quantity: admin.firestore.FieldValue.increment(-quantity),
         });
-      }
+      
+        // Update the last updated timestamp for the products collection
+        const lastUpdatedRef = app.firestore().collection('lastUpdated');
+        const lastUpdatedQuery = lastUpdatedRef.where('type', '==', 'products');
+        const lastUpdatedSnapshot = await lastUpdatedQuery.get();
+        const lastUpdatedDoc = lastUpdatedSnapshot.docs[0];
+        if (lastUpdatedDoc) {
+          await lastUpdatedDoc.ref.update({
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        } else {
+          // Timestamp does not exist, create it
+          await lastUpdatedRef.add({
+            type: 'products',
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      }      
     }
   }
 

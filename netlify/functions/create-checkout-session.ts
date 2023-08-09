@@ -130,28 +130,40 @@ function calculate_shipping(quantity: number, country: string): Big {
   // Calculate shipping cost based on quantity and country
   let shipping_cost = new Big(0);
   if (country === "GB") {
-    if (quantity <= 21) {
-      shipping_cost = new Big(1.0);
-    } else if (quantity >= 22 && quantity <= 55) {
-      shipping_cost = new Big(2.1);
-    } else if (quantity > 55 && quantity <= 108) {
-      shipping_cost = new Big(2.65);
-    } else if (quantity > 108 && quantity <= 159) {
-      shipping_cost = new Big(2.95);
+    if (quantity <= Number(process.env.GB_QTY_1)) {
+      shipping_cost = process.env.GB_COST_1 ? new Big(process.env.GB_COST_1) : new Big(0);
+    } else if (quantity <= Number(process.env.GB_QTY_2)) {
+      shipping_cost = process.env.GB_COST_2 ? new Big(process.env.GB_COST_2) : new Big(0);
+    } else if (quantity <= Number(process.env.GB_QTY_3)) {
+      shipping_cost = process.env.GB_COST_3 ? new Big(process.env.GB_COST_3) : new Big(0);
+    } else if (quantity <= Number(process.env.GB_QTY_4)) {
+      shipping_cost = process.env.GB_COST_4 ? new Big(process.env.GB_COST_4) : new Big(0);
     } else {
-      shipping_cost = new Big(3.75);
+      shipping_cost = process.env.GB_COST_5 ? new Big(process.env.GB_COST_5) : new Big(0);
+    }
+  } else if (country === "US") {
+    if (quantity <= Number(process.env.US_QTY_1)) {
+      shipping_cost = process.env.US_COST_1 ? new Big(process.env.US_COST_1) : new Big(0);
+    } else if (quantity <= Number(process.env.US_QTY_2)) {
+      shipping_cost = process.env.US_COST_2 ? new Big(process.env.US_COST_2) : new Big(0);
+    } else if (quantity <= Number(process.env.US_QTY_3)) {
+      shipping_cost = process.env.US_COST_3 ? new Big(process.env.US_COST_3) : new Big(0);
+    } else if (quantity <= Number(process.env.US_QTY_4)) {
+      shipping_cost = process.env.US_COST_4 ? new Big(process.env.US_COST_4) : new Big(0);
+    } else {
+      shipping_cost = process.env.US_COST_5 ? new Big(process.env.US_COST_5) : new Big(0);
     }
   } else {
-    if (quantity <= 21) {
-      shipping_cost = new Big(3.2);
-    } else if (quantity >= 22 && quantity <= 55) {
-      shipping_cost = new Big(12.0);
-    } else if (quantity > 55 && quantity <= 108) {
-      shipping_cost = new Big(12.0);
-    } else if (quantity > 108 && quantity <= 159) {
-      shipping_cost = new Big(12.0);
+    if (quantity <= Number(process.env.OTHER_QTY_1)) {
+      shipping_cost = process.env.OTHER_COST_1 ? new Big(process.env.OTHER_COST_1) : new Big(0);
+    } else if (quantity <= Number(process.env.OTHER_QTY_2)) {
+      shipping_cost = process.env.OTHER_COST_2 ? new Big(process.env.OTHER_COST_2) : new Big(0);
+    } else if (quantity <= Number(process.env.OTHER_QTY_3)) {
+      shipping_cost = process.env.OTHER_COST_3 ? new Big(process.env.OTHER_COST_3) : new Big(0);
+    } else if (quantity <= Number(process.env.OTHER_QTY_4)) {
+      shipping_cost = process.env.OTHER_COST_4 ? new Big(process.env.OTHER_COST_4) : new Big(0);
     } else {
-      shipping_cost = new Big(12.0);
+      shipping_cost = process.env.OTHER_COST_5 ? new Big(process.env.OTHER_COST_5) : new Big(0);
     }
   }
   return shipping_cost;

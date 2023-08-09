@@ -41,9 +41,17 @@ const Product: React.FC<Props> = ({ product }: Props) => {
       alert(`Can't add more than ${quantity} of this product to basket`);
     }
   };
-
-  if (quantity === 0 && session?.user.email !== process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL) return null;
-
+  
+  if (!process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL) {
+    console.error('NEXT_PUBLIC_AUTHORIZED_EMAIL environment variable is not set');
+    return null;
+  }
+  
+  const authorizedEmails = process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL.includes(',')
+    ? process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL.split(',')
+    : [process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL];
+  
+  if (quantity <= 0 && !authorizedEmails.includes(session?.user.email as string)) return null;  
   return (
     <>
       <div className="relative flex flex-col items-center m-2 bg-white z-30 p-6 w-5/12 md:w-1/5">

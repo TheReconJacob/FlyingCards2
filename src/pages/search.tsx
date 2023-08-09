@@ -3,25 +3,27 @@ import { IProduct } from '../../typings';
 import Header from '../components/Header';
 import ProductFeed from '../components/ProductFeed';
 import React from 'react';
-import { useProductContext } from '../components/context/ProductContext'; // Import the useProductContext
-import { useFetchProducts } from '../hooks/UseFetchProducts'; // Import the useFetchProducts custom hook
+import { useProductContext } from '../components/context/ProductContext';
 
 const SearchPage = () => {
   const router = useRouter();
-  const { q } = router.query;
-
-  // Call the custom hook to set up the real-time listener and fetch data from Firebase
-  useFetchProducts();
-
-  // Use the product context to get the products and loading state
+  const q = router.query.q as string;
   const { products, loading, error } = useProductContext();
+
+  // Filter the list of products based on the search query
+  const filteredProducts = q
+    ? products.filter(product =>
+        product.title.toLowerCase().includes(q.toLowerCase())
+      )
+    : [];
 
   return (
     <div className="bg-gray-100">
       <Header />
       <main className="max-w-screen-2xl mx-auto">
-        <h1 className="text-3xl font-bold mt-4 mb-6">Search results for "{q}"</h1>
-        <ProductFeed products={products} />
+        <h1 className="text-3xl font-bold mt-4 mb-6 text-center">Search results for "{q}"</h1>
+        {/* Pass the filtered list of products to the ProductFeed component */}
+        <ProductFeed products={filteredProducts} />
       </main>
     </div>
   );

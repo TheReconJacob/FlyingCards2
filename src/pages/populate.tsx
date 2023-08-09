@@ -1,22 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GetServerSidePropsContext } from "next";
 import { getSession, useSession } from "next-auth/react";
 import Head from "next/head";
 import { IProduct, ISession } from "../../typings";
 import Header from "../components/Header";
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, serverTimestamp, doc } from 'firebase/firestore';
 import db from '../../firebase';
+import { useProductContext } from "components/context/ProductContext";
 
-
-type Props = {
-  products: IProduct[];
-};
-
-const Populate = ({ products }: Props) => {
+const Populate = () => {
+  const { products, loading, error } = useProductContext();
   const { data: session } = useSession();
+  
+  if (!process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL) {
+    console.error('NEXT_PUBLIC_AUTHORIZED_EMAIL environment variable is not set');
+    return null;
+  }
+  
+  const authorizedEmails = process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL.includes(',')
+    ? process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL.split(',')
+    : [process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL];
 
   // Check if the logged-in user is authorized
-  const isAuthorized = session?.user.email === process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL;
+  const isAuthorized = authorizedEmails.includes(session?.user.email as string);
 
   const [newProduct, setNewProduct] = useState<IProduct>({
     id: '',
@@ -32,6 +38,10 @@ const Populate = ({ products }: Props) => {
   const [editedProducts, setEditedProducts] = useState<IProduct[]>(products);
 
   const [removedProducts, setRemovedProducts] = useState<IProduct[]>([]);
+  
+  useEffect(() => {
+    setEditedProducts(products);
+  }, [products]);
   
   // Function to handle updating a field in the new product form
   const handleUpdateNewProductField = (field: keyof IProduct, value: string | number) => {
@@ -82,9 +92,28 @@ const Populate = ({ products }: Props) => {
       id: newId,
       description: newProduct.description ?? '', // Set description to an empty string if it is undefined
       quantity: newProduct.quantity ?? 0, // Set quantity to 0 if it is undefined
+      subcategory: newProduct.subcategory ?? '', // Set subcategory to an empty string if it is undefined
+      subsubcategory: newProduct.subsubcategory ?? '', // Set subsubcategory to an empty string if it is undefined
     });
-    // Refresh the page
-    location.reload();
+    // Clear the input fields
+    setNewProduct({
+      id: '',
+      title: '',
+      price: 0,
+      description: '',
+      category: '',
+      image: '',
+      quantity: 0,
+      subcategory: '',
+      subsubcategory: '',
+    });
+  
+    // Update the last updated timestamp for the products collection
+    const lastUpdatedRef = collection(db, 'lastUpdated');
+    const lastUpdatedQuery = query(lastUpdatedRef, where('type', '==', 'products'));
+    const lastUpdatedSnapshot = await getDocs(lastUpdatedQuery);
+    const lastUpdatedDocRef = lastUpdatedSnapshot.docs[0]?.ref;
+    await updateDoc(lastUpdatedDocRef, { timestamp: serverTimestamp() });
   }
 
   // Function to handle submitting the changes
@@ -106,6 +135,8 @@ const Populate = ({ products }: Props) => {
           category: product.category,
           image: product.image,
           quantity: product.quantity,
+          subcategory: product.subcategory ?? '', // Set subcategory to an empty string if it is undefined
+          subsubcategory: product.subsubcategory ?? '', // Set subsubcategory to an empty string if it is undefined
         });
       }
     }
@@ -124,7 +155,14 @@ const Populate = ({ products }: Props) => {
         console.log(`No document found with id ${product.id}`);
       }
     }
-    location.reload();
+  
+    // Update the last updated timestamp for the products collection
+    const lastUpdatedRef = collection(db, 'lastUpdated');
+    const lastUpdatedQuery = query(lastUpdatedRef, where('type', '==', 'products'));
+    const lastUpdatedSnapshot = await getDocs(lastUpdatedQuery);
+    const lastUpdatedDocRef = lastUpdatedSnapshot.docs[0]?.ref;
+    await updateDoc(lastUpdatedDocRef, { timestamp: serverTimestamp() });
+
   } 
 
   return (
@@ -138,6 +176,7 @@ const Populate = ({ products }: Props) => {
             <title>Populate Products</title>
             <link rel="icon" href="/fcicon.ico" />
           </Head>
+          <h2>When adding or editing a product, please allow roughly 20 seconds before navigating away from this page.</h2>
           {/* New product form */}
           <div className="m-5 bg-white z-30 p-10">
             <h2>New Product</h2>
@@ -171,6 +210,24 @@ const Populate = ({ products }: Props) => {
               type="text"
               value={newProduct.category}
               onChange={e => handleUpdateNewProductField('category', e.target.value)}
+              className="border border-gray-300 rounded-md p-1"
+            />
+            <br />
+            {/* Input field for subcategory */}
+            <label>Subcategory:</label>
+            <input
+              type="text"
+              value={newProduct.subcategory}
+              onChange={e => handleUpdateNewProductField('subcategory', e.target.value)}
+              className="border border-gray-300 rounded-md p-1"
+            />
+            <br />
+            {/* Input field for subsubcategory */}
+            <label>Sub-subcategory:</label>
+            <input
+              type="text"
+              value={newProduct.subsubcategory}
+              onChange={e => handleUpdateNewProductField('subsubcategory', e.target.value)}
               className="border border-gray-300 rounded-md p-1"
             />
             <br />
@@ -250,6 +307,24 @@ const Populate = ({ products }: Props) => {
                   className="border border-gray-300 rounded-md p-1"
                 />
                 <br />
+                {/* Input field for subcategory */}
+                <label>Subcategory:</label>
+                <input
+                  type="text"
+                  value={product.subcategory}
+                  onChange={e => handleUpdateProductField(index, 'subcategory', e.target.value)}
+                  className="border border-gray-300 rounded-md p-1"
+                />
+                <br />
+                {/* Input field for subsubcategory */}
+                <label>Sub-subcategory:</label>
+                <input
+                  type="text"
+                  value={product.subsubcategory}
+                  onChange={e => handleUpdateProductField(index, 'subsubcategory', e.target.value)}
+                  className="border border-gray-300 rounded-md p-1"
+                />
+                <br />
                 <label>Image URL: *</label>
                 <img src={product.image} alt={product.title} className="object-contain w-252 h-350 mx-auto" />
                 <input
@@ -316,23 +391,10 @@ export default Populate;
 export const getServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const productsRef = collection(db, 'products');
-  const snapshot = await getDocs(productsRef);
-  const products = snapshot.docs.map(doc => doc.data());
-
   // Get user logged in credentials
   const session: ISession | null = await getSession(context);
-  if (!session) {
-    return {
-      props: {
-        products,
-      },
-    };
-  }
-
   return {
     props: {
-      products,
       session,
     },
   };

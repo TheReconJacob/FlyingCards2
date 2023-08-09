@@ -9,30 +9,25 @@ import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import { selectItems } from "../slices/basketSlice";
 import { useEffect, useState } from "react";
+import { useCategories } from '../hooks/useCategories';
 
 type Props = {};
 
 const Header = (props: Props) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const { data: session, status } = useSession();
+  const [openCategoryIndex, setOpenCategoryIndex] = useState<number | null>(null);
+  const [openSubcategoryIndex, setOpenSubcategoryIndex] = useState<number | null>(null);
   const router = useRouter();
   const items = useSelector(selectItems);
-  const [searchQuery, setSearchQuery] = useState("");
+
+  // Use the categories custom hook to get the list of categories
+  const categories = useCategories();
 
   const handleSearch = () => {
     router.push(`/search?q=${searchQuery}`);
   };
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const res = await fetch('/.netlify/functions/categories');
-      const categories = await res.json();
-      setCategories(categories);
-    };
-    
-    fetchCategories();
-  }, []);  
 
   return (
     <header>
@@ -40,7 +35,7 @@ const Header = (props: Props) => {
       <div className="flex items-center bg-[#1d2298] p-1 flex-grow py-2">
         <div className="h-12 flex items-center flex-grow sm:flex-grow-0">
           <Image
-            onClick={() => router.push("/")}
+            onClick={() => router.push('/')}
             className="cursor-pointer overflow-hidden mt-2"
             src="/flyingcards.png"
             width={150}
@@ -88,26 +83,32 @@ const Header = (props: Props) => {
               </button>
             )}
           </div>
-          <div
-            onClick={() => session && router.push("/orders")}
-            className="cursor-pointer link"
-          >
-            <p>Returns</p>
-            <p className="font-extrabold md:text-sm">& Orders</p>
-          </div>
-          <div
-            onClick={() => router.push("/checkout")}
-            className="relative link flex items-center"
-          >
-            <span className="absolute top-0 -right-2 md:right-10 w-4 h-4 bg-[#01C4CC] text-center rounded-full text-black font-bold">
-              {items.length}
-            </span>
+            {session ? (
+            <>
+              <div
+                onClick={() => session && router.push('/orders')}
+                className="cursor-pointer link"
+              >
+                <p>Returns</p>
+                <p className="font-extrabold md:text-sm">& Orders</p>
+              </div>
+            </>
+            ) : (
+              <div></div>
+            )}
+            <div
+              onClick={() => router.push('/checkout')}
+              className="relative link flex items-center"
+            >
+              <span className="absolute top-0 -right-2 md:right-10 w-4 h-4 bg-[#01C4CC] text-center rounded-full text-black font-bold">
+                {items.length}
+              </span>
 
-            <ShoppingCartIcon className="h-10" />
-            <p className="hidden md:inline font-extrabold text-sm mt-2">
-              Basket
-            </p>
-          </div>
+              <ShoppingCartIcon className="h-10" />
+              <p className="hidden md:inline font-extrabold text-sm mt-2">
+                Basket
+              </p>
+            </div>
         </div>
       </div>
       {/* mobile search and Banner*/}
@@ -137,9 +138,66 @@ const Header = (props: Props) => {
         </div>
         {/* bottom nav */}
         <div className="flex items-center space-x-3 p-2 pl-6 bg-[#4c4fbd] text-white text-sm">
-          {categories.map(category => (
-            <p key={category} className="link" onClick={() => router.push(`/category/${category}`)}>{category}</p>
+          {categories.map((category, index) => (
+            <div
+              key={category.name}
+              className="relative"
+              onMouseEnter={() => setOpenCategoryIndex(index)}
+              onMouseLeave={() => setOpenCategoryIndex(null)}
+              onTouchStart={() => setOpenCategoryIndex(index)}
+            >
+              <p className="link" onClick={() => router.push(`/category/${category.name}`)}
+                style={{
+                  WebkitTouchCallout: 'none',
+                  WebkitUserSelect: 'none',
+                  KhtmlUserSelect: 'none',
+                  MozUserSelect: 'none',
+                  msUserSelect: 'none',
+                  userSelect: 'none',
+                }}>
+                  {category.name}
+              </p>
+              
+              {/* Subcategory dropdown menu */}
+              {openCategoryIndex === index && category.subcategories.length > 0 && (
+                <div className="absolute top-full left-0 bg-[#4c4fbd] text-white p-2 rounded-md shadow-md">
+                  {category.subcategories.map((subcategory, index) => (
+                    <div
+                      key={subcategory.name}
+                      className="relative"
+                      onMouseEnter={() => setOpenSubcategoryIndex(index)}
+                      onMouseLeave={() => setOpenSubcategoryIndex(null)}
+                      onTouchStart={() => setOpenSubcategoryIndex(index)}
+                    >
+                      <p className="link" onClick={() => router.push(`/category/${category.name}/${subcategory.name}`)}
+                        style={{
+                          WebkitTouchCallout: 'none',
+                          WebkitUserSelect: 'none',
+                          KhtmlUserSelect: 'none',
+                          MozUserSelect: 'none',
+                          msUserSelect: 'none',
+                          userSelect: 'none',
+                        }}>
+                        {subcategory.name}
+                      </p>
+                      
+                      {/* Sub-subcategory dropdown menu */}
+                      {openSubcategoryIndex === index && subcategory.subsubcategories.length > 0 && (
+                        <div className="absolute top-0 left-full bg-[#4c4fbd] text-white p-2 rounded-md shadow-md">
+                          {subcategory.subsubcategories.map(subsubcategory => (
+                            <p key={subsubcategory} className="link" onClick={() => router.push(`/category/${category.name}/${subcategory.name}/${subsubcategory}`)}>
+                              {subsubcategory}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
+          <p className="link" onClick={() => router.push('/contactus')}>Contact Us</p>
         </div>
       </div>
     </header>

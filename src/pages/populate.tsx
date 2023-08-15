@@ -39,10 +39,6 @@ const Populate = () => {
 
   const [removedProducts, setRemovedProducts] = useState<IProduct[]>([]);
   
-  useEffect(() => {
-    setEditedProducts(products);
-  }, [products]);
-  
   // Function to handle updating a field in the new product form
   const handleUpdateNewProductField = (field: keyof IProduct, value: string | number) => {
     setNewProduct(prevState => ({

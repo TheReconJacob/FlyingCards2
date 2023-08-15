@@ -19,7 +19,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             <Head>
               <link rel="icon" href="/fcicon.ico" />
             </Head>
-            <Script src="https://mutcheng.net/400/6205792" />
+            {/* <Script src="https://mutcheng.net/400/6205792" /> */}
             <Ad />
             <Component {...pageProps} />
             <Footer />

@@ -69,6 +69,7 @@ const ProductFeed: React.FC<Props> = ({ products }: Props) => {
           justify-content: center;
           margin-top: 5px;
           max-width: 80%;
+          flex-wrap: wrap; /* Added this line */
         }
         .page-item {
           margin-right: 0.25rem;
@@ -95,6 +96,7 @@ const ProductFeed: React.FC<Props> = ({ products }: Props) => {
                 max-width: none;
             }
             .page-item {
+                margin-top: 0.25rem;
                 margin-bottom: 0.25rem;
             }
         }

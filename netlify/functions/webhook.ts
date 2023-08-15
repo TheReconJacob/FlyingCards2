@@ -49,17 +49,27 @@ const fulfillOrder = async (session: any) => {
   // Define the app variable
   const app = await appPromise;
 
-  // Get the id of the Stripe Payment object
+  let paymentId: string | undefined;
+
   const stripe = await stripePromise;
-  const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+  
+  if (session.payment_method_types && session.payment_method_types.includes("card")) {
+    // Get the id of the Stripe Payment object
+    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
 
-  if (
-    paymentIntent.charges &&
-    paymentIntent.charges.data.length > 0 &&
-    paymentIntent.charges.data[0].payment_method
-  ) {
-    const paymentId = paymentIntent.charges.data[0].payment_method as string;
+    if (
+      paymentIntent.charges &&
+      paymentIntent.charges.data.length > 0 &&
+      paymentIntent.charges.data[0].payment_method
+    ) {
+      paymentId = paymentIntent.charges.data[0].payment_method as string;
+    }
+  } else if (session.payment_method_types && session.payment_method_types.includes("paypal")) {
+    // Get the id of the PayPal Payment object
+    paymentId = session.metadata.paypal_order_id;
+  }
 
+  if (paymentId) {
     await app
       .firestore()
       .collection("users")
@@ -102,9 +112,6 @@ const fulfillOrder = async (session: any) => {
   const itemIds = JSON.parse(session.metadata.itemIds);
   const quantities = JSON.parse(session.metadata.quantities);
 
-  // Get purchased items from checkout session
-  const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-
   // Update quantity value of each item in Firebase
   for (const [index, itemId] of itemIds.entries()) {
     // Query products collection by id field
@@ -113,40 +120,35 @@ const fulfillOrder = async (session: any) => {
       .collection("products")
       .where("id", "==", itemId);
     const itemQuerySnapshot = await itemQuery.get();
+    const itemDoc = itemQuerySnapshot.docs[0];
 
-    // Check if query returned any documents
-    if (!itemQuerySnapshot.empty) {
-      // Get first document from query snapshot
-      const itemDoc = itemQuerySnapshot.docs[0];
+    // Find the corresponding quantity in the quantities array
+    const quantity = quantities[index];
 
-      // Find the corresponding quantity in the quantities array
-      const quantity = quantities[index];
-
-      // Check if quantity is defined and not null
-      if (quantity !== null) {
-        // Decrement item quantity by purchased quantity
-        await itemDoc.ref.update({
-          quantity: admin.firestore.FieldValue.increment(-quantity),
+    // Check if quantity is defined and not null
+    if (quantity !== null) {
+      // Decrement item quantity by purchased quantity
+      await itemDoc.ref.update({
+        quantity: admin.firestore.FieldValue.increment(-quantity),
+      });
+    
+      // Update the last updated timestamp for the products collection
+      const lastUpdatedRef = app.firestore().collection('lastUpdated');
+      const lastUpdatedQuery = lastUpdatedRef.where('type', '==', 'products');
+      const lastUpdatedSnapshot = await lastUpdatedQuery.get();
+      const lastUpdatedDoc = lastUpdatedSnapshot.docs[0];
+      if (lastUpdatedDoc) {
+        await lastUpdatedDoc.ref.update({
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
-      
-        // Update the last updated timestamp for the products collection
-        const lastUpdatedRef = app.firestore().collection('lastUpdated');
-        const lastUpdatedQuery = lastUpdatedRef.where('type', '==', 'products');
-        const lastUpdatedSnapshot = await lastUpdatedQuery.get();
-        const lastUpdatedDoc = lastUpdatedSnapshot.docs[0];
-        if (lastUpdatedDoc) {
-          await lastUpdatedDoc.ref.update({
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        } else {
-          // Timestamp does not exist, create it
-          await lastUpdatedRef.add({
-            type: 'products',
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        }
-      }      
-    }
+      } else {
+        // Timestamp does not exist, create it
+        await lastUpdatedRef.add({
+          type: 'products',
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+    }      
   }
 
   console.log(`SUCCESS: Order ${session.id} has been added to the DB`);

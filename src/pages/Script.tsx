@@ -6,6 +6,13 @@ interface ScriptProps {
 
 const Script = ({ src }: ScriptProps) => {
   useEffect(() => {
+    // Check if the user is on a desktop device
+    const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+    if (!isDesktop) {
+      console.log('Not on a desktop device, not running script');
+      return;
+    }
+
     // Check if the condition has already been met
     const conditionMet = localStorage.getItem('conditionMet') === 'true';
     if (conditionMet) {

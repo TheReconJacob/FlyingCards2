@@ -73,6 +73,7 @@ const ProductFeed: React.FC<Props> = ({ products }: Props) => {
         }
         .page-item {
           margin-right: 0.25rem;
+          margin-bottom: 0.25rem;
         }
         .page-link {
           color: white;
@@ -96,7 +97,6 @@ const ProductFeed: React.FC<Props> = ({ products }: Props) => {
                 max-width: none;
             }
             .page-item {
-                margin-top: 0.25rem;
                 margin-bottom: 0.25rem;
             }
         }

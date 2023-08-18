@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import axios from "axios";
 import { useSession } from "next-auth/react";
@@ -8,6 +8,7 @@ import CheckoutProduct from "../components/CheckoutProduct";
 import Header from "../components/Header";
 import { selectItems, selectTotal } from "../slices/basketSlice";
 import { IProduct } from "../../typings";
+import Big from "big.js";
 
 let stripePromise: Promise<Stripe | null>;
 
@@ -25,6 +26,31 @@ const Checkout = (props: Props) => {
   const [city, setCity] = useState("");
   const [stateProvince, setStateProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [shippingCost, setShippingCost] = useState(new Big(0));
+  const [totalCost, setTotalCost] = useState(new Big(0));
+
+  
+  const calculateTotalCost = () => {
+    const subtotal = items.reduce((accumulator, item) => {
+      const itemPrice = new Big(item.price);
+      return accumulator.plus(itemPrice);
+    }, new Big(0));
+
+    return subtotal;
+  };
+
+  useEffect(() => {
+    const newTotalCost = calculateTotalCost();
+    setTotalCost(newTotalCost);
+  }, [items]);
+  
+  const handleShippingCountryChange = () => {
+    // Calculate and set the shipping cost when the shipping country changes
+    if (shippingCountry) {
+      const calculatedShippingCost = calculate_shipping(items.length, shippingCountry); // Assuming items.length is the quantity
+      setShippingCost(calculatedShippingCost);
+    }
+  };
 
   type Data = {
     items: IProduct[];
@@ -37,6 +63,49 @@ const Checkout = (props: Props) => {
     stateProvince?: string;
     postalCode?: string;
   };
+
+  function calculate_shipping(quantity: number, country: string): Big {
+    // Calculate shipping cost based on quantity and country
+    let shipping_cost = new Big(0);
+    if (country === "GB") {
+      if (quantity <= Number(21)) {
+        shipping_cost = 1 ? new Big(1) : new Big(0);
+      } else if (quantity <= Number(55)) {
+        shipping_cost = 2.1 ? new Big(2.1) : new Big(0);
+      } else if (quantity <= Number(108)) {
+        shipping_cost = 2.65 ? new Big(2.65) : new Big(0);
+      } else if (quantity <= Number(159)) {
+        shipping_cost = 2.95 ? new Big(2.95) : new Big(0);
+      } else {
+        shipping_cost = 3.75 ? new Big(3.75) : new Big(0);
+      }
+    } else if (country === "US") {
+      if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_1)) {
+        shipping_cost = process.env.NEXT_PUBLIC_US_COST_1 ? new Big(process.env.NEXT_PUBLIC_US_COST_1) : new Big(0);
+      } else if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_2)) {
+        shipping_cost = process.env.NEXT_PUBLIC_US_COST_2 ? new Big(process.env.NEXT_PUBLIC_US_COST_2) : new Big(0);
+      } else if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_3)) {
+        shipping_cost = process.env.NEXT_PUBLIC_US_COST_3 ? new Big(process.env.NEXT_PUBLIC_US_COST_3) : new Big(0);
+      } else if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_4)) {
+        shipping_cost = process.env.NEXT_PUBLIC_US_COST_4 ? new Big(process.env.NEXT_PUBLIC_US_COST_4) : new Big(0);
+      } else {
+        shipping_cost = process.env.NEXT_PUBLIC_US_COST_5 ? new Big(process.env.NEXT_PUBLIC_US_COST_5) : new Big(0);
+      }
+    } else {
+      if (quantity <= Number(21)) {
+        shipping_cost = 3.2 ? new Big(3.2) : new Big(0);
+      } else if (quantity <= Number(process.env.NEXT_PUBLIC_OTHER_QTY_2)) {
+        shipping_cost = 12 ? new Big(12) : new Big(0);
+      } else if (quantity <= Number(process.env.NEXT_PUBLIC_OTHER_QTY_3)) {
+        shipping_cost = 12 ? new Big(12) : new Big(0);
+      } else if (quantity <= Number(process.env.NEXT_PUBLIC_OTHER_QTY_4)) {
+        shipping_cost = 12 ? new Big(12) : new Big(0);
+      } else {
+        shipping_cost = 12 ? new Big(12) : new Big(0);
+      }
+    }
+    return shipping_cost;
+  }
 
   const createCheckoutSession = async (paymentMethod: string) => {
     // Call the backend to create a checkout session
@@ -116,6 +185,8 @@ const Checkout = (props: Props) => {
           )}
           {session && items.length > 0 && (
             <>
+              <p>Total Cost: ${totalCost.toFixed(2)}</p>
+              <p>Shipping Cost: ${shippingCost.toString()}</p>
               {/* Payment method selection */}
               <div>
                 <input
@@ -163,7 +234,10 @@ const Checkout = (props: Props) => {
                     <select
                       id="shipping-country"
                       value={shippingCountry}
-                      onChange={(e) => setShippingCountry(e.target.value)}
+                      onChange={(e) => {
+                        setShippingCountry(e.target.value);
+                        handleShippingCountryChange();
+                      }}
                       required
                       autoComplete="country"
                     >
@@ -414,7 +488,10 @@ const Checkout = (props: Props) => {
                   <select
                     id="shipping-country"
                     value={shippingCountry}
-                    onChange={(e) => setShippingCountry(e.target.value)}
+                    onChange={(e) => {
+                      setShippingCountry(e.target.value);
+                      handleShippingCountryChange();
+                    }}
                     required
                     autoComplete="country"
                   >

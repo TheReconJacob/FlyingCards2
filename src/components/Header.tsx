@@ -38,8 +38,8 @@ const Header = (props: Props) => {
             onClick={() => router.push('/')}
             className="cursor-pointer overflow-hidden mt-2"
             src="/flyingcards.png"
-            width={150}
-            height={40}
+            width={100}
+            height={30}
             alt="Flying Cards"
           />
         </div>

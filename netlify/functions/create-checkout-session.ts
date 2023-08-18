@@ -43,16 +43,38 @@ exports.handler = async (
 ) => {
   const { items, email, shippingCountry, paymentMethod, streetAddress1, streetAddress2, city, stateProvince, postalCode } = JSON.parse(event.body);
 
-  // Calculate shipping cost based on selected shipping country
-  let shippingCost = calculate_shipping(items.length, shippingCountry);
-
-  // Round shippingCost to 2 decimal places using big.js
-  shippingCost = new Big(shippingCost).round(2);
-
   if (paymentMethod === "stripe") {
     const stripe = await stripePromise;
+  
+    // Group items by price, description, and image
+    const groupedItems = items.reduce((groups: any, item: IProduct) => {
+      const key = `${item.price}-${item.description}-${item.image}`;
+      if (!groups[key]) {
+        groups[key] = {
+          price: item.price,
+          description: item.description,
+          image: item.image,
+          title: item.title,
+          quantity: 0,
+        };
+      }
+      groups[key].quantity += 1;
+      return groups;
+    }, {});
 
-    const transformedItems = items.map((item: IProduct) => {
+    // Calculate total number of items after grouping
+    const totalItems = Object.values(groupedItems).reduce((total: number, item: any) => {
+      return total + item.quantity;
+    }, 0);
+
+    // Calculate shipping cost based on selected shipping country and total number of items
+    let shippingCost = calculate_shipping(totalItems, shippingCountry);
+
+    // Round shippingCost to 2 decimal places using big.js
+    shippingCost = new Big(shippingCost).round(2);
+  
+    // Convert grouped items to an array of line items
+    const transformedItems = Object.values(groupedItems).map((item: any) => {
       let product_data: { name: string; images: string[]; description?: string } = {
         name: item.title,
         images: [item.image],
@@ -67,10 +89,10 @@ exports.handler = async (
       return {
         price_data: {
           currency: "gbp",
-          unit_amount: price.times(100).toFixed(0),
+          unit_amount: Number(price.times(100).toFixed(0)),
           product_data,
         },
-        quantity: 1,
+        quantity: item.quantity,
       };
     });
 
@@ -80,8 +102,9 @@ exports.handler = async (
         currency: "gbp",
         product_data: {
           name: "Shipping",
+          images: [],
         },
-        unit_amount: shippingCost.times(100).toFixed(0),
+        unit_amount: Number(shippingCost.times(100).toFixed(0)),
       },
       quantity: 1,
     });
@@ -99,8 +122,19 @@ exports.handler = async (
         imagesField = JSON.stringify(uniqueImageUrls);
       }
       
-      const itemIds = items.map((item: IProduct) => item.id);
-      const quantities = transformedItems.map((item: IProduct) => item.quantity);
+      let itemIdsLong = items.map((item: IProduct) => item.id);
+      let itemIds = JSON.stringify(itemIdsLong);
+      while (itemIds.length > 400 && itemIdsLong.length > 0) {
+        itemIdsLong.pop();
+        itemIds = JSON.stringify(itemIdsLong);
+      }
+      
+      let quantitiesLong = transformedItems.map((item: { quantity: number }) => item.quantity);
+      let quantities = JSON.stringify(quantitiesLong);
+      while (quantities.length > 400 && quantitiesLong.length > 0) {
+        quantitiesLong.pop();
+        quantities = JSON.stringify(quantitiesLong);
+      }
 
       const session = await stripe.checkout.sessions.create({
         payment_method_types: ["card"],
@@ -122,11 +156,9 @@ exports.handler = async (
                 .join(", ")
                 .slice(0, 400)
             ) + (items.length > 1 ? "..." : ""),
-          itemIds:
-            JSON.stringify(itemIds),
-          quantities:
-            JSON.stringify(quantities),
-        },
+          itemIds: itemIds,
+          quantities: quantities,
+        },        
       });
 
       callback(null, {
@@ -137,19 +169,23 @@ exports.handler = async (
             session.id }),
       });
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error creating checkout session:", error.message);
+      if (error instanceof Error && error.message.includes("You may not specify more than 100 line items.")) {
+        alert("Stripe cannot process more than 100 unique items at once. Please remove some items from your basket.");
       } else {
-        console.error("Error creating checkout session:", error);
+        if (error instanceof Error) {
+          console.error("Error creating checkout session:", error.message);
+        } else {
+          console.error("Error creating checkout session:", error);
+        }
       }
-
+    
       callback(null, {
         statusCode:
           500,
         body:
           JSON.stringify({ error }),
       });
-    }
+    }    
     // Stripe code ends here
   } else if (paymentMethod === "paypal") {
     // PayPal code starts here

@@ -31,6 +31,7 @@ const Banner = (props: Props) => {
             height={500}
             src="/carousel2.png"
             alt="carousel2"
+            priority
           />
         </div>
         <div>
@@ -39,6 +40,7 @@ const Banner = (props: Props) => {
             height={500}
             src="/carousel3.png"
             alt="carousel3"
+            priority
           />
         </div>
       </Carousel>

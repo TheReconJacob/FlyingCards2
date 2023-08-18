@@ -18,6 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <Layout>
             <Head>
               <link rel="icon" href="/fcicon.ico" />
+              <title>Flying Cards</title>
             </Head>
             {/* <Script src="https://mutcheng.net/400/6205792" /> */}
             <Ad />

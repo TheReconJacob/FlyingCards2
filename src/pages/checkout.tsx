@@ -44,10 +44,13 @@ const Checkout = (props: Props) => {
     setTotalCost(newTotalCost);
   }, [items]);
   
-  const handleShippingCountryChange = () => {
+  const handleShippingCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedCountry = e.target.value;
+    setShippingCountry(selectedCountry);
+
     // Calculate and set the shipping cost when the shipping country changes
-    if (shippingCountry) {
-      const calculatedShippingCost = calculate_shipping(items.length, shippingCountry); // Assuming items.length is the quantity
+    if (selectedCountry) {
+      const calculatedShippingCost = calculate_shipping(items.length, selectedCountry); // Replace items.length with the correct quantity source
       setShippingCost(calculatedShippingCost);
     }
   };
@@ -80,25 +83,25 @@ const Checkout = (props: Props) => {
         shipping_cost = 3.75 ? new Big(3.75) : new Big(0);
       }
     } else if (country === "US") {
-      if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_1)) {
-        shipping_cost = process.env.NEXT_PUBLIC_US_COST_1 ? new Big(process.env.NEXT_PUBLIC_US_COST_1) : new Big(0);
-      } else if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_2)) {
-        shipping_cost = process.env.NEXT_PUBLIC_US_COST_2 ? new Big(process.env.NEXT_PUBLIC_US_COST_2) : new Big(0);
-      } else if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_3)) {
-        shipping_cost = process.env.NEXT_PUBLIC_US_COST_3 ? new Big(process.env.NEXT_PUBLIC_US_COST_3) : new Big(0);
-      } else if (quantity <= Number(process.env.NEXT_PUBLIC_US_QTY_4)) {
-        shipping_cost = process.env.NEXT_PUBLIC_US_COST_4 ? new Big(process.env.NEXT_PUBLIC_US_COST_4) : new Big(0);
+      if (quantity <= Number(21)) {
+        shipping_cost = 3.2 ? new Big(3.2) : new Big(0);
+      } else if (quantity <= Number(55)) {
+        shipping_cost = 12 ? new Big(12) : new Big(0);
+      } else if (quantity <= Number(108)) {
+        shipping_cost = 12 ? new Big(12) : new Big(0);
+      } else if (quantity <= Number(159)) {
+        shipping_cost = 12 ? new Big(12) : new Big(0);
       } else {
-        shipping_cost = process.env.NEXT_PUBLIC_US_COST_5 ? new Big(process.env.NEXT_PUBLIC_US_COST_5) : new Big(0);
+        shipping_cost = 12 ? new Big(12) : new Big(0);
       }
     } else {
       if (quantity <= Number(21)) {
         shipping_cost = 3.2 ? new Big(3.2) : new Big(0);
-      } else if (quantity <= Number(process.env.NEXT_PUBLIC_OTHER_QTY_2)) {
+      } else if (quantity <= Number(55)) {
         shipping_cost = 12 ? new Big(12) : new Big(0);
-      } else if (quantity <= Number(process.env.NEXT_PUBLIC_OTHER_QTY_3)) {
+      } else if (quantity <= Number(108)) {
         shipping_cost = 12 ? new Big(12) : new Big(0);
-      } else if (quantity <= Number(process.env.NEXT_PUBLIC_OTHER_QTY_4)) {
+      } else if (quantity <= Number(159)) {
         shipping_cost = 12 ? new Big(12) : new Big(0);
       } else {
         shipping_cost = 12 ? new Big(12) : new Big(0);
@@ -176,6 +179,15 @@ const Checkout = (props: Props) => {
         </div>
         {/* Right */}
         <div className="flex flex-col bg-white p-10 shadow-md">
+          
+          {items.length > 0 && (   
+            <div>
+            <p>Item Cost: £{totalCost.toFixed(2)}</p>
+            <p>Shipping: £{shippingCost.toFixed(2)}</p>
+            <p>Grand Total: £{(totalCost.plus(shippingCost)).toFixed(2)}</p>
+            <br />
+            </div>
+          )}
           {items.length > 0 && (
             <h3>
               {session
@@ -185,8 +197,6 @@ const Checkout = (props: Props) => {
           )}
           {session && items.length > 0 && (
             <>
-              <p>Total Cost: ${totalCost.toFixed(2)}</p>
-              <p>Shipping Cost: ${shippingCost.toString()}</p>
               {/* Payment method selection */}
               <div>
                 <input
@@ -234,10 +244,7 @@ const Checkout = (props: Props) => {
                     <select
                       id="shipping-country"
                       value={shippingCountry}
-                      onChange={(e) => {
-                        setShippingCountry(e.target.value);
-                        handleShippingCountryChange();
-                      }}
+                      onChange={(e) => handleShippingCountryChange(e)}
                       required
                       autoComplete="country"
                     >
@@ -488,10 +495,7 @@ const Checkout = (props: Props) => {
                   <select
                     id="shipping-country"
                     value={shippingCountry}
-                    onChange={(e) => {
-                      setShippingCountry(e.target.value);
-                      handleShippingCountryChange();
-                    }}
+                    onChange={(e) => handleShippingCountryChange(e)}
                     required
                     autoComplete="country"
                   >

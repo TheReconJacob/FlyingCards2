@@ -201,7 +201,8 @@ exports.handler = async (
       quantity: "1",
       name: item.title,
       description: item.description,
-    }));
+    }
+    ));
 
     const totalQuantity = transformedItemsPayPal.reduce(
       (acc: number, curr: { quantity: string }) => acc + Number(curr.quantity),
@@ -209,7 +210,17 @@ exports.handler = async (
     );
         
     const newShippingCost = calculate_shipping(totalQuantity, shippingCountry);
-    
+    let itemIds = items.map((item: IProduct) => item.id);
+    const customData = {
+      email: email,
+      itemIds: itemIds,
+    };
+
+    let customDataString = JSON.stringify(customData);
+    while (customDataString.length > 127 && customData.itemIds.length > 0) {
+      customData.itemIds.pop();
+      customDataString = JSON.stringify(customData);
+    }
     const request = new paypal.orders.OrdersCreateRequest();
     request.prefer("return=representation");
     request.requestBody({
@@ -239,6 +250,7 @@ exports.handler = async (
             },
           },
           items: transformedItemsPayPal,
+          custom_id: JSON.stringify(customData),
           shipping: {
             address: {
               address_line_1: streetAddress1,
@@ -288,19 +300,19 @@ function calculate_shipping(quantity: number, country: string): Big {
   // Calculate shipping cost based on quantity and country
   let shipping_cost = new Big(0);
   if (country === "GB") {
-    if (quantity <= Number(7)) {
+    if (quantity <= Number(21)) {
       shipping_cost = 1 ? new Big(1) : new Big(0);
     } else if (quantity <= Number(55)) {
       shipping_cost = 2.1 ? new Big(2.1) : new Big(0);
     } else if (quantity <= Number(108)) {
-      shipping_cost = 3.75 ? new Big(2.65) : new Big(0);
+      shipping_cost = 2.65 ? new Big(2.65) : new Big(0);
     } else if (quantity <= Number(159)) {
-      shipping_cost = 3.75 ? new Big(2.95) : new Big(0);
+      shipping_cost = 2.95 ? new Big(2.95) : new Big(0);
     } else {
       shipping_cost = 3.75 ? new Big(3.75) : new Big(0);
     }
   } else if (country === "US") {
-    if (quantity <= Number(7)) {
+    if (quantity <= Number(21)) {
       shipping_cost = 3.2 ? new Big(3.2) : new Big(0);
     } else if (quantity <= Number(55)) {
       shipping_cost = 12 ? new Big(12) : new Big(0);
@@ -312,7 +324,7 @@ function calculate_shipping(quantity: number, country: string): Big {
       shipping_cost = 12 ? new Big(12) : new Big(0);
     }
   } else {
-    if (quantity <= Number(7)) {
+    if (quantity <= Number(21)) {
       shipping_cost = 3.2 ? new Big(3.2) : new Big(0);
     } else if (quantity <= Number(55)) {
       shipping_cost = 12 ? new Big(12) : new Big(0);

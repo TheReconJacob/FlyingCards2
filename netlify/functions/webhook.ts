@@ -1,5 +1,12 @@
 import type Stripe from 'stripe';
+import paypal from "@paypal/checkout-server-sdk";
 import type { APIGatewayProxyEvent, Context, Callback } from 'aws-lambda';
+
+const environment = new paypal.core.LiveEnvironment(
+  process.env.PAYPAL_CLIENT_ID as string,
+  process.env.PAYPAL_CLIENT_SECRET as string
+);
+const client = new paypal.core.PayPalHttpClient(environment);
 
 const adminPromise = import("firebase-admin").then((adminModule) => {
   const admin = adminModule.default;
@@ -75,6 +82,19 @@ const fulfillOrder = async (session: any) => {
     title = JSON.parse(session.metadata.title);
     email = session.metadata.email;
   } else if (session.resource && session.resource.purchase_units && JSON.parse(session.resource.purchase_units[0].custom_id).itemIds) {
+    const orderId = session.resource.id;
+
+    // Create an instance of the OrdersCaptureRequest class
+    const captureRequest = new paypal.orders.OrdersCaptureRequest(orderId);
+
+    // Call the capture method to capture the payment
+    let captureResponse;
+    try {
+      captureResponse = await client.execute(captureRequest);
+      console.log('Capture:', captureResponse.result);
+    } catch (err) {
+      console.error(err);
+    }
     // Get the id of the PayPal Payment object
     const customData = JSON.parse(session.resource.purchase_units[0].custom_id);
     paymentId = session.resource.id;

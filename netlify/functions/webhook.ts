@@ -110,7 +110,7 @@ const fulfillOrder = async (session: any) => {
   
   console.log("session data is " + JSON.stringify(session, null, 2));
   console.log("information is: ", "payment id: ", paymentId, "amount: ", amount, "amount shipping: ", amount_shipping, "images: ", images, "title: ", title, "email: ", email);
-  if (paymentId) {
+  if ((session.payment_method_types && session.payment_method_types.includes("card")) || (session.resource && session.resource.purchase_units && JSON.parse(session.resource.purchase_units[0].custom_id).itemIds)) {
     await app
       .firestore()
       .collection("users")
@@ -155,62 +155,62 @@ const fulfillOrder = async (session: any) => {
       });
       console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
     }
-  }
 
-  // Parse item IDs and quantities from checkout session metadata
-  let itemIds: string[] = [];
-  let quantities: number[] = [];
-  console.log("1111");
-  console.log(session.resource.purchase_units[0]);
-  if (session.metadata && session.metadata.itemIds && session.metadata.quantities) {
-    itemIds = JSON.parse(session.metadata.itemIds);
-    quantities = JSON.parse(session.metadata.quantities);
-  } else {
-    for (const item of session.resource.purchase_units[0].items) {
-      quantities.push(parseInt(item.quantity));
-    }
-    const customData = JSON.parse(session.resource.purchase_units[0].custom_id)
-    console.log(customData.itemIds);
-    itemIds = customData.itemIds;
-  }
-
-  // Update quantity value of each item in Firebase
-  for (const [index, itemId] of (itemIds as string[]).entries()) {
-    // Query products collection by id field
-    const itemQuery = admin
-      .firestore()
-      .collection("products")
-      .where("id", "==", itemId);
-    const itemQuerySnapshot = await itemQuery.get();
-    const itemDoc = itemQuerySnapshot.docs[0];
-
-    // Find the corresponding quantity in the quantities array
-    const quantity = (quantities as number[])[index];
-
-    // Check if quantity is defined and not null
-    if (quantity !== null) {
-      // Decrement item quantity by purchased quantity
-      await itemDoc.ref.update({
-        quantity: admin.firestore.FieldValue.increment(-quantity),
-      });
-    
-      // Update the last updated timestamp for the products collection
-      const lastUpdatedRef = app.firestore().collection('lastUpdated');
-      const lastUpdatedQuery = lastUpdatedRef.where('type', '==', 'products');
-      const lastUpdatedSnapshot = await lastUpdatedQuery.get();
-      const lastUpdatedDoc = lastUpdatedSnapshot.docs[0];
-      if (lastUpdatedDoc) {
-        await lastUpdatedDoc.ref.update({
-          timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        });
-      } else {
-        // Timestamp does not exist, create it
-        await lastUpdatedRef.add({
-          type: 'products',
-          timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        });
+    // Parse item IDs and quantities from checkout session metadata
+    let itemIds: string[] = [];
+    let quantities: number[] = [];
+    console.log("1111");
+    console.log(session.resource.purchase_units[0]);
+    if (session.metadata && session.metadata.itemIds && session.metadata.quantities) {
+      itemIds = JSON.parse(session.metadata.itemIds);
+      quantities = JSON.parse(session.metadata.quantities);
+    } else {
+      for (const item of session.resource.purchase_units[0].items) {
+        quantities.push(parseInt(item.quantity));
       }
-    }      
+      const customData = JSON.parse(session.resource.purchase_units[0].custom_id)
+      console.log(customData.itemIds);
+      itemIds = customData.itemIds;
+    }
+
+    // Update quantity value of each item in Firebase
+    for (const [index, itemId] of (itemIds as string[]).entries()) {
+      // Query products collection by id field
+      const itemQuery = admin
+        .firestore()
+        .collection("products")
+        .where("id", "==", itemId);
+      const itemQuerySnapshot = await itemQuery.get();
+      const itemDoc = itemQuerySnapshot.docs[0];
+
+      // Find the corresponding quantity in the quantities array
+      const quantity = (quantities as number[])[index];
+
+      // Check if quantity is defined and not null
+      if (quantity !== null) {
+        // Decrement item quantity by purchased quantity
+        await itemDoc.ref.update({
+          quantity: admin.firestore.FieldValue.increment(-quantity),
+        });
+      
+        // Update the last updated timestamp for the products collection
+        const lastUpdatedRef = app.firestore().collection('lastUpdated');
+        const lastUpdatedQuery = lastUpdatedRef.where('type', '==', 'products');
+        const lastUpdatedSnapshot = await lastUpdatedQuery.get();
+        const lastUpdatedDoc = lastUpdatedSnapshot.docs[0];
+        if (lastUpdatedDoc) {
+          await lastUpdatedDoc.ref.update({
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        } else {
+          // Timestamp does not exist, create it
+          await lastUpdatedRef.add({
+            type: 'products',
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+      }      
+    }
   }
 
   console.log(`SUCCESS: Quantity has been updated`);

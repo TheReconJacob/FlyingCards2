@@ -64,7 +64,6 @@ const fulfillOrder = async (session: any) => {
   let email: string | undefined;
 
   const stripe = await stripePromise;
-  console.log("WORK YOU IDIOT!");
   if (session.payment_method_types && session.payment_method_types.includes("card")) {
     // Get the id of the Stripe Payment object
     const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
@@ -110,7 +109,7 @@ const fulfillOrder = async (session: any) => {
   
   console.log("session data is " + JSON.stringify(session, null, 2));
   console.log("information is: ", "payment id: ", paymentId, "amount: ", amount, "amount shipping: ", amount_shipping, "images: ", images, "title: ", title, "email: ", email);
-  if ((session.payment_method_types && session.payment_method_types.includes("card")) || (session.resource && session.resource.purchase_units && JSON.parse(session.resource.purchase_units[0].custom_id).itemIds)) {
+  if (paymentId && amount && amount_shipping && images && title && email) {
     await app
       .firestore()
       .collection("users")
@@ -126,27 +125,19 @@ const fulfillOrder = async (session: any) => {
         id: paymentId,
       });
 
-    console.log("11");
     // Update the last updated timestamp for the user's orders
     const lastUpdatedRef = app.firestore().collection('lastUpdated');
-    console.log("22");
     const lastUpdatedQuery = lastUpdatedRef
       .where('type', '==', 'orders')
       .where('email', '==', email);
-    console.log("33");
     const lastUpdatedSnapshot = await lastUpdatedQuery.get();
-    console.log("44");
     const lastUpdatedDoc = lastUpdatedSnapshot.docs[0];
-    console.log("55");
     if (lastUpdatedDoc) {
-      console.log("66");
       await lastUpdatedDoc.ref.update({
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
       });
-      console.log("77");
       console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
     } else {
-      console.log("88");
       // Timestamp does not exist, create it
       await lastUpdatedRef.add({
         type: 'orders',
@@ -159,7 +150,6 @@ const fulfillOrder = async (session: any) => {
     // Parse item IDs and quantities from checkout session metadata
     let itemIds: string[] = [];
     let quantities: number[] = [];
-    console.log("1111");
     console.log(session.resource.purchase_units[0]);
     if (session.metadata && session.metadata.itemIds && session.metadata.quantities) {
       itemIds = JSON.parse(session.metadata.itemIds);
@@ -192,6 +182,7 @@ const fulfillOrder = async (session: any) => {
         await itemDoc.ref.update({
           quantity: admin.firestore.FieldValue.increment(-quantity),
         });
+        console.log(`SUCCESS: Quantity has been updated`);
       
         // Update the last updated timestamp for the products collection
         const lastUpdatedRef = app.firestore().collection('lastUpdated');
@@ -212,8 +203,6 @@ const fulfillOrder = async (session: any) => {
       }      
     }
   }
-
-  console.log(`SUCCESS: Quantity has been updated`);
 };
 
 exports.handler = async (event: APIGatewayProxyEvent, context: Context, callback: Callback) => {

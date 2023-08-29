@@ -33,13 +33,12 @@ const Header = (props: Props) => {
     <header style={{ position: 'relative', zIndex: 100 }}>
       {/* top nav */}
       <div className="flex items-center bg-[#1d2298] p-1 flex-grow py-2">
-        <div className="h-12 flex items-center flex-grow sm:flex-grow-0">
+        <div className="h-12 flex items-center flex-grow sm:flex-grow-0 justify-center">
           <Image
             onClick={() => router.push('/')}
             className="cursor-pointer overflow-hidden mt-2"
             src="/flyingcards.png"
-            width={100}
-            height={30}
+            width={50}
             alt="Flying Cards"
           />
         </div>
@@ -47,7 +46,7 @@ const Header = (props: Props) => {
         <div className="hidden sm:flex items-center h-10 rounded-md flex-grow cursor-pointer bg-[#4c4fbd] hover:bg-[#6c6fdd]">
           <input
             type="text"
-            className="bg-white p-2 h-full w-6 flex-grow flex-shrink rounded-l-md focus:outline-none px-4"
+            className="bg-white p-2 h-full w-6 flex-grow flex-shrink rounded-l-md focus:outline-none px-4 pl-6"
             value={searchQuery}
             onChange={event => setSearchQuery(event.target.value)}
             onKeyDown={event => {

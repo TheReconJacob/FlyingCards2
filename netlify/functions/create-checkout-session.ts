@@ -312,28 +312,28 @@ function calculate_shipping(quantity: number, country: string): Big {
       shipping_cost = 3.75 ? new Big(5) : new Big(0);
     }
   } else if (country === "US") {
-    if (quantity <= Number(21)) {
+    if (quantity <= Number(6)) {
       shipping_cost = 3.2 ? new Big(3.2) : new Big(0);
-    } else if (quantity <= Number(55)) {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
-    } else if (quantity <= Number(108)) {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
-    } else if (quantity <= Number(159)) {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
+    } else if (quantity <= Number(15)) {
+      shipping_cost = 12 ? new Big(5.2) : new Big(0);
+    } else if (quantity <= Number(49)) {
+      shipping_cost = 12 ? new Big(6.85) : new Big(0);
+    } else if (quantity <= Number(161)) {
+      shipping_cost = 12 ? new Big(15.10) : new Big(0);
     } else {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
+      shipping_cost = 12 ? new Big(31.10) : new Big(0);
     }
   } else {
-    if (quantity <= Number(21)) {
+    if (quantity <= Number(6)) {
       shipping_cost = 3.2 ? new Big(3.2) : new Big(0);
-    } else if (quantity <= Number(55)) {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
-    } else if (quantity <= Number(108)) {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
-    } else if (quantity <= Number(159)) {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
+    } else if (quantity <= Number(15)) {
+      shipping_cost = 12 ? new Big(5.2) : new Big(0);
+    } else if (quantity <= Number(49)) {
+      shipping_cost = 12 ? new Big(6.85) : new Big(0);
+    } else if (quantity <= Number(161)) {
+      shipping_cost = 12 ? new Big(15.10) : new Big(0);
     } else {
-      shipping_cost = 12 ? new Big(12) : new Big(0);
+      shipping_cost = 12 ? new Big(31.10) : new Big(0);
     }
   }
   return shipping_cost;

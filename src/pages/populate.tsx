@@ -263,6 +263,25 @@ const Populate = () => {
             </button>
           </div>
           {/* Product editor */}
+          {/* Submit button for Changes */}
+          <button
+            onClick={() => {
+              let allFieldsFilled = true;
+              editedProducts.forEach(product => {
+                if (!product.title || !product.price || !product.category || !product.image) {
+                  allFieldsFilled = false;
+                }
+              });
+              if (allFieldsFilled) {
+                handleSubmitChanges();
+              } else {
+                alert('Please fill in all required fields');
+              }
+            }}
+            className="mt-auto button mx-auto mb-10"
+          >
+            Submit Changes
+          </button>
           <div className="grid grid-flow-row-dense md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {editedProducts.map((product, index) => (
               <div key={product.id} className="relative flex flex-col m-5 bg-white z-30 p-10">
@@ -340,25 +359,6 @@ const Populate = () => {
               </div>
             ))}
           </div>
-          {/* Submit button for Changes */}
-          <button
-            onClick={() => {
-              let allFieldsFilled = true;
-              editedProducts.forEach(product => {
-                if (!product.title || !product.price || !product.category || !product.image) {
-                  allFieldsFilled = false;
-                }
-              });
-              if (allFieldsFilled) {
-                handleSubmitChanges();
-              } else {
-                alert('Please fill in all required fields');
-              }
-            }}
-            className="mt-auto button mx-auto mb-10"
-          >
-            Submit Changes
-          </button>
       </main>
       ) : (
         // Render placeholder image for unauthorized users

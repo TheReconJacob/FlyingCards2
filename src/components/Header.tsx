@@ -184,7 +184,7 @@ const Header = (props: Props) => {
                       {openSubcategoryIndex === index && subcategory.subsubcategories.length > 0 && (
                         <div className="my-2 text-center absolute top-0 left-full bg-[#4c4fbd] text-white p-2 rounded-md shadow-md">
                           {subcategory.subsubcategories.map(subsubcategory => (
-                            <p key={subsubcategory} className="link" onClick={() => router.push(`/category/${category.name}/${subcategory.name}/${subsubcategory}`)}>
+                            <p key={subsubcategory} className="link my-2" onClick={() => router.push(`/category/${category.name}/${subcategory.name}/${subsubcategory}`)}>
                               {subsubcategory}
                             </p>
                           ))}

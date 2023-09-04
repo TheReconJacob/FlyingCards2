@@ -4,6 +4,7 @@ import Header from '../../components/Header';
 import ProductFeed from '../../components/ProductFeed';
 import React from 'react';
 import { useProductContext } from '../../components/context/ProductContext';
+
 const CategoryPage = () => {
   const router = useRouter();
   const { category: categorySegments } = router.query;
@@ -15,9 +16,9 @@ const CategoryPage = () => {
   // Filter the list of products based on the category, subcategory, and subsubcategory
   const filteredProducts = products.filter(product => {
     if (subsubcategory) {
-      return product.subsubcategory === subsubcategory;
+      return product.subsubcategory === subsubcategory && product.subcategory === subcategory && product.category === category;
     } else if (subcategory) {
-      return product.subcategory === subcategory;
+      return product.subcategory === subcategory && product.category === category;
     } else {
       return product.category === category;
     }

@@ -106,10 +106,21 @@ const fulfillOrder = async (session: any) => {
     }
     email = customData.email;
   }
+    
+
+  // Check if the order already exists in the database
+  const orderRef = app.firestore().collection("users").doc(email as string).collection("orders").doc(session.id);
+  const orderDoc = await orderRef.get();
+  if (orderDoc.exists) {
+    // Order already exists, return without processing it again
+    console.log(`Order ${session.id} has already been processed`);
+    return;
+  }
   
   console.log("session data is " + JSON.stringify(session, null, 2));
   console.log("information is: ", "payment id: ", paymentId, "amount: ", amount, "amount shipping: ", amount_shipping, "images: ", images, "title: ", title, "email: ", email);
-  if (paymentId && amount && amount_shipping && images && title && email) {
+  if (paymentId !== undefined && amount !== undefined && amount_shipping !== undefined && images !== undefined && title !== undefined && email !== undefined)
+  {
     await app
       .firestore()
       .collection("users")
@@ -179,8 +190,18 @@ const fulfillOrder = async (session: any) => {
       // Check if quantity is defined and not null
       if (quantity !== null) {
         // Decrement item quantity by purchased quantity
-        await itemDoc.ref.update({
-          quantity: admin.firestore.FieldValue.increment(-quantity),
+        const itemDocRef = itemDoc.ref;
+
+        await admin.firestore().runTransaction(async (transaction) => {
+          const itemDoc = await transaction.get(itemDocRef);
+          if (!itemDoc.exists) {
+            throw "Item does not exist!";
+          }
+
+          let newQuantity = (itemDoc.data() as any).quantity - quantity;
+          if (newQuantity < 0) newQuantity = 0;
+          
+          transaction.update(itemDocRef, { quantity: newQuantity });
         });
         console.log(`SUCCESS: Quantity has been updated`);
       

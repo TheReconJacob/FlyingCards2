@@ -22,6 +22,8 @@ const About = (props: Props) => {
             <a className="text-blue-500 underline">here</a>
           </Link>!
         </p>
+        <br />
+        <p>Our address is 36 Bishops Way, Surrey, TW20 8EW, United Kingdom.</p>
         {/* ... */}
       </main>
     </>

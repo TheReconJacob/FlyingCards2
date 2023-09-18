@@ -39,11 +39,14 @@ const serviceAccount = {
 };
 
 const appPromise = adminPromise.then(({ admin }) => {
-  return !admin.apps.length
-    ? admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      })
-    : admin.app();
+  const appName = 'Flying Cards';
+  if (!admin.apps.find(app => (app as any).name === appName)) {
+    return admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    }, appName);
+  } else {
+    return admin.app(appName);
+  }
 });
 
 const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
@@ -161,7 +164,6 @@ const fulfillOrder = async (session: any) => {
     // Parse item IDs and quantities from checkout session metadata
     let itemIds: string[] = [];
     let quantities: number[] = [];
-    console.log(session.resource.purchase_units[0]);
     if (session.metadata && session.metadata.itemIds && session.metadata.quantities) {
       itemIds = JSON.parse(session.metadata.itemIds);
       quantities = JSON.parse(session.metadata.quantities);

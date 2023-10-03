@@ -192,18 +192,8 @@ const fulfillOrder = async (session: any) => {
       // Check if quantity is defined and not null
       if (quantity !== null) {
         // Decrement item quantity by purchased quantity
-        const itemDocRef = itemDoc.ref;
-
-        await admin.firestore().runTransaction(async (transaction) => {
-          const itemDoc = await transaction.get(itemDocRef);
-          if (!itemDoc.exists) {
-            throw "Item does not exist!";
-          }
-
-          let newQuantity = (itemDoc.data() as any).quantity - quantity;
-          if (newQuantity < 0) newQuantity = 0;
-          
-          transaction.update(itemDocRef, { quantity: newQuantity });
+        await itemDoc.ref.update({
+          quantity: admin.firestore.FieldValue.increment(-quantity),
         });
         console.log(`SUCCESS: Quantity has been updated`);
       

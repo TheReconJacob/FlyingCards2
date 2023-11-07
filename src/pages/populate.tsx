@@ -8,6 +8,11 @@ import { collection, getDocs, addDoc, updateDoc, deleteDoc, query, where, server
 import db from '../../firebase';
 import { useProductContext } from "components/context/ProductContext";
 
+import dynamic from 'next/dynamic';
+const QuillNoSSRWrapper = dynamic(import('react-quill'), {
+  ssr: false,
+});
+
 const Populate = () => {
   const { products, loading, error } = useProductContext();
   const { data: session } = useSession();
@@ -33,6 +38,8 @@ const Populate = () => {
     image: '',
     quantity: 0,
   });
+
+  const [editorContent, setEditorContent] = useState('');
 
   // State to keep track of the edited product fields
   const [editedProducts, setEditedProducts] = useState<IProduct[]>(products);
@@ -261,6 +268,48 @@ const Populate = () => {
             >
               Submit New Product
             </button>
+          </div>
+          <div className="m-5 bg-white z-30 p-10">
+          {/* Old Products List */}
+          <h2>Old Products List</h2>
+          <QuillNoSSRWrapper value={editorContent} onChange={setEditorContent} />
+          <button
+            onClick={async () => {
+              // Query the products collection for a document with a matching title field
+              const querySnapshot = await getDocs(query(collection(db, 'products'), where('title', '==', 'HIDDEN PRODUCT')));
+              // Get the first document from the query result (there should only be one)
+              const docSnapshot = querySnapshot.docs[0];
+              if (docSnapshot) {
+                // Get a reference to the product document
+                const productRef = docSnapshot.ref;
+                // Update the product document with the new information
+                await updateDoc(productRef, {
+                  title: 'HIDDEN PRODUCT',
+                  price: 0,
+                  description: editorContent,
+                  category: 'any',
+                  image: 'any',
+                  quantity: 0,
+                });
+              } else {
+                // If no document with the title "HIDDEN PRODUCT" exists, create a new one
+                const newId = "HIDDENPRODUCT"
+                await addDoc(collection(db, 'products'), {
+                  id: newId,
+                  title: 'HIDDEN PRODUCT',
+                  price: 0,
+                  description: editorContent,
+                  category: 'any',
+                  image: 'any',
+                  quantity: 0,
+                });
+              }
+              setEditorContent('');
+            }}
+            className="mt-auto button mx-auto mb-10"
+          >
+            Submit Rich Text Editor Product
+          </button>
           </div>
           {/* Product editor */}
           {/* Submit button for Changes */}

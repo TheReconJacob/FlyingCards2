@@ -8,6 +8,7 @@ import Layout from '../components/Layout';
 import Head from 'next/head';
 import Ad from '../components/Ads';
 import Footer from '../components/Footer';
+import 'react-quill/dist/quill.snow.css';
 import Script from './Script';
 
 function MyApp({ Component, pageProps }: AppProps) {

@@ -123,6 +123,7 @@ const Populate = () => {
   const handleSubmitChanges = async () => {
     // Loop through the edited products
     for (const product of editedProducts) {
+      if (product.id === 'HIDDENPRODUCT') continue;
       // Query the products collection for a document with a matching product.id field
       const querySnapshot = await getDocs(query(collection(db, 'products'), where('id', '==', product.id)));
       // Get the first document from the query result (there should only be one)
@@ -299,7 +300,7 @@ const Populate = () => {
                   title: 'HIDDEN PRODUCT',
                   price: 0,
                   description: editorContent,
-                  category: 'any',
+                  category: 'HIDDENPRODUCT',
                   image: 'any',
                   quantity: 0,
                 });
@@ -333,79 +334,81 @@ const Populate = () => {
           </button>
           <div className="grid grid-flow-row-dense md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {editedProducts.map((product, index) => (
-              <div key={product.id} className="relative flex flex-col m-5 bg-white z-30 p-10">
-                {/* X button to remove product */}
-                <button onClick={() => handleRemoveProduct(product.id)} className="absolute top-2 right-2 text-lg font-bold">
-                  X
-                </button>
-                {/* Render input fields for each product field (except id) */}
-                <label>Title: *</label>
-                <input
-                  type="text"
-                  value={product.title}
-                  onChange={e => handleUpdateProductField(index, 'title', e.target.value)}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-                <br />
-                <label>Price: *</label>
-                <input
-                  type="number"
-                  value={product.price}
-                  onChange={e => handleUpdateProductField(index, 'price', parseFloat(e.target.value))}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-                <br />
-                <label>Description:</label>
-                <input
-                  type="text"
-                  value={product.description}
-                  onChange={e => handleUpdateProductField(index, 'description', e.target.value)}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-                <br />
-                <label>Category: *</label>
-                <input
-                  type="text"
-                  value={product.category}
-                  onChange={e => handleUpdateProductField(index, 'category', e.target.value)}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-                <br />
-                {/* Input field for subcategory */}
-                <label>Subcategory:</label>
-                <input
-                  type="text"
-                  value={product.subcategory}
-                  onChange={e => handleUpdateProductField(index, 'subcategory', e.target.value)}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-                <br />
-                {/* Input field for subsubcategory */}
-                <label>Sub-subcategory:</label>
-                <input
-                  type="text"
-                  value={product.subsubcategory}
-                  onChange={e => handleUpdateProductField(index, 'subsubcategory', e.target.value)}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-                <br />
-                <label>Image URL: *</label>
-                <img src={product.image} alt={product.title} className="object-contain w-252 h-350 mx-auto" />
-                <input
-                  type="text"
-                  value={product.image}
-                  onChange={e => handleUpdateProductField(index, 'image', e.target.value)}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-                <br />
-                <label>Quantity: *</label>
-                <input
-                  type="number"
-                  value={product.quantity}
-                  onChange={e => handleUpdateProductField(index, 'quantity', parseInt(e.target.value))}
-                  className="border border-gray-300 rounded-md p-1"
-                />
-              </div>
+              product.id !== 'HIDDENPRODUCT' && (
+                <div key={product.id} className="relative flex flex-col m-5 bg-white z-30 p-10">
+                  {/* X button to remove product */}
+                  <button onClick={() => handleRemoveProduct(product.id)} className="absolute top-2 right-2 text-lg font-bold">
+                    X
+                  </button>
+                  {/* Render input fields for each product field (except id) */}
+                  <label>Title: *</label>
+                  <input
+                    type="text"
+                    value={product.title}
+                    onChange={e => handleUpdateProductField(index, 'title', e.target.value)}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                  <br />
+                  <label>Price: *</label>
+                  <input
+                    type="number"
+                    value={product.price}
+                    onChange={e => handleUpdateProductField(index, 'price', parseFloat(e.target.value))}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                  <br />
+                  <label>Description:</label>
+                  <input
+                    type="text"
+                    value={product.description}
+                    onChange={e => handleUpdateProductField(index, 'description', e.target.value)}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                  <br />
+                  <label>Category: *</label>
+                  <input
+                    type="text"
+                    value={product.category}
+                    onChange={e => handleUpdateProductField(index, 'category', e.target.value)}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                  <br />
+                  {/* Input field for subcategory */}
+                  <label>Subcategory:</label>
+                  <input
+                    type="text"
+                    value={product.subcategory}
+                    onChange={e => handleUpdateProductField(index, 'subcategory', e.target.value)}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                  <br />
+                  {/* Input field for subsubcategory */}
+                  <label>Sub-subcategory:</label>
+                  <input
+                    type="text"
+                    value={product.subsubcategory}
+                    onChange={e => handleUpdateProductField(index, 'subsubcategory', e.target.value)}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                  <br />
+                  <label>Image URL: *</label>
+                  <img src={product.image} alt={product.title} className="object-contain w-252 h-350 mx-auto" />
+                  <input
+                    type="text"
+                    value={product.image}
+                    onChange={e => handleUpdateProductField(index, 'image', e.target.value)}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                  <br />
+                  <label>Quantity: *</label>
+                  <input
+                    type="number"
+                    value={product.quantity}
+                    onChange={e => handleUpdateProductField(index, 'quantity', parseInt(e.target.value))}
+                    className="border border-gray-300 rounded-md p-1"
+                  />
+                </div>
+              )
             ))}
           </div>
       </main>

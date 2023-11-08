@@ -51,7 +51,7 @@ const Product: React.FC<Props> = ({ product }: Props) => {
     ? process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL.split(',')
     : [process.env.NEXT_PUBLIC_AUTHORIZED_EMAIL];
   
-  if (quantity <= 0 && !authorizedEmails.includes(session?.user.email as string)) return null;  
+    if (id === 'HIDDENPRODUCT' || quantity <= 0 && !authorizedEmails.includes(session?.user.email as string)) return null;
   return (
     <>
       <div className="relative flex flex-col items-center m-2 bg-white z-30 p-6 w-5/12 md:w-1/5">

@@ -138,63 +138,65 @@ const Header = (props: Props) => {
         {/* bottom nav */}
         <div className="flex items-center space-x-3 p-2 pl-6 bg-[#4c4fbd] text-white text-sm">
           {categories.map((category, index) => (
-            <div
-              key={category.name}
-              className="relative"
-              onMouseEnter={() => setOpenCategoryIndex(index)}
-              onMouseLeave={() => setOpenCategoryIndex(null)}
-              onTouchStart={() => setOpenCategoryIndex(index)}
-            >
-              <p className="link text-center" onClick={() => router.push(`/category/${category.name}`)}
-                style={{
-                  WebkitTouchCallout: 'none',
-                  WebkitUserSelect: 'none',
-                  KhtmlUserSelect: 'none',
-                  MozUserSelect: 'none',
-                  msUserSelect: 'none',
-                  userSelect: 'none',
-                }}>
-                  {category.name}
-              </p>
-              
-              {/* Subcategory dropdown menu */}
-              {openCategoryIndex === index && category.subcategories.length > 0 && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 bg-[#4c4fbd] text-white p-2 rounded-md shadow-md">
-                  {category.subcategories.map((subcategory, index) => (
-                    <div
-                      key={subcategory.name}
-                      className="relative"
-                      onMouseEnter={() => setOpenSubcategoryIndex(index)}
-                      onMouseLeave={() => setOpenSubcategoryIndex(null)}
-                      onTouchStart={() => setOpenSubcategoryIndex(index)}
-                    >
-                      <p className="link my-2 text-center" onClick={() => router.push(`/category/${category.name}/${subcategory.name}`)}
-                        style={{
-                          WebkitTouchCallout: 'none',
-                          WebkitUserSelect: 'none',
-                          KhtmlUserSelect: 'none',
-                          MozUserSelect: 'none',
-                          msUserSelect: 'none',
-                          userSelect: 'none',
-                        }}>
-                        {subcategory.name}
-                      </p>
-                      
-                      {/* Sub-subcategory dropdown menu */}
-                      {openSubcategoryIndex === index && subcategory.subsubcategories.length > 0 && (
-                        <div className="my-2 text-center absolute top-0 left-full bg-[#4c4fbd] text-white p-2 rounded-md shadow-md">
-                          {subcategory.subsubcategories.map(subsubcategory => (
-                            <p key={subsubcategory} className="link my-2" onClick={() => router.push(`/category/${category.name}/${subcategory.name}/${subsubcategory}`)}>
-                              {subsubcategory}
-                            </p>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            category.name !== 'HIDDENPRODUCT' && (
+              <div
+                key={category.name}
+                className="relative"
+                onMouseEnter={() => setOpenCategoryIndex(index)}
+                onMouseLeave={() => setOpenCategoryIndex(null)}
+                onTouchStart={() => setOpenCategoryIndex(index)}
+              >
+                <p className="link text-center" onClick={() => router.push(`/category/${category.name}`)}
+                  style={{
+                    WebkitTouchCallout: 'none',
+                    WebkitUserSelect: 'none',
+                    KhtmlUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none',
+                    userSelect: 'none',
+                  }}>
+                    {category.name}
+                </p>
+                
+                {/* Subcategory dropdown menu */}
+                {openCategoryIndex === index && category.subcategories.length > 0 && (
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 bg-[#4c4fbd] text-white p-2 rounded-md shadow-md">
+                    {category.subcategories.map((subcategory, index) => (
+                      <div
+                        key={subcategory.name}
+                        className="relative"
+                        onMouseEnter={() => setOpenSubcategoryIndex(index)}
+                        onMouseLeave={() => setOpenSubcategoryIndex(null)}
+                        onTouchStart={() => setOpenSubcategoryIndex(index)}
+                      >
+                        <p className="link my-2 text-center" onClick={() => router.push(`/category/${category.name}/${subcategory.name}`)}
+                          style={{
+                            WebkitTouchCallout: 'none',
+                            WebkitUserSelect: 'none',
+                            KhtmlUserSelect: 'none',
+                            MozUserSelect: 'none',
+                            msUserSelect: 'none',
+                            userSelect: 'none',
+                          }}>
+                          {subcategory.name}
+                        </p>
+                        
+                        {/* Sub-subcategory dropdown menu */}
+                        {openSubcategoryIndex === index && subcategory.subsubcategories.length > 0 && (
+                          <div className="my-2 text-center absolute top-0 left-full bg-[#4c4fbd] text-white p-2 rounded-md shadow-md">
+                            {subcategory.subsubcategories.map(subsubcategory => (
+                              <p key={subsubcategory} className="link my-2" onClick={() => router.push(`/category/${category.name}/${subcategory.name}/${subsubcategory}`)}>
+                                {subsubcategory}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
           ))}
           <p className="link" onClick={() => router.push('/contactus')}>Contact Us</p>
         </div>

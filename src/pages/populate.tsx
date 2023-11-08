@@ -39,7 +39,9 @@ const Populate = () => {
     quantity: 0,
   });
 
-  const [editorContent, setEditorContent] = useState('');
+  const hiddenProduct = products.find((product: any) => product.id === 'HIDDENPRODUCT');
+
+  const [editorContent, setEditorContent] = useState(hiddenProduct?.description || '');
 
   // State to keep track of the edited product fields
   const [editedProducts, setEditedProducts] = useState<IProduct[]>(products);
@@ -288,7 +290,7 @@ const Populate = () => {
                   title: 'HIDDEN PRODUCT',
                   price: 0,
                   description: editorContent,
-                  category: 'any',
+                  category: 'HIDDENPRODUCT',
                   image: 'any',
                   quantity: 0,
                 });
@@ -309,7 +311,7 @@ const Populate = () => {
             }}
             className="mt-auto button mx-auto mb-10"
           >
-            Submit Rich Text Editor Product
+            Submit List of Old Products
           </button>
           </div>
           {/* Product editor */}
@@ -318,7 +320,7 @@ const Populate = () => {
             onClick={() => {
               let allFieldsFilled = true;
               editedProducts.forEach(product => {
-                if (!product.title || !product.price || !product.category || !product.image) {
+                if ((!product.title || !product.price || !product.category || !product.image) && product.id != "HIDDENPRODUCT") {
                   allFieldsFilled = false;
                 }
               });

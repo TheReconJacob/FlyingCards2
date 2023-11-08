@@ -198,6 +198,7 @@ const Header = (props: Props) => {
               </div>
             )
           ))}
+          <p className="link" onClick={() => router.push('/oldproducts')}>Old Products</p>
           <p className="link" onClick={() => router.push('/contactus')}>Contact Us</p>
         </div>
       </div>
